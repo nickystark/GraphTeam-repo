@@ -57,7 +57,7 @@ The name of the team in the submission [Form](https://docs.google.com/forms/d/e/
 
 - Ensure that your solution is fully reproducible. Include any random seeds or initialization details used to ensure consistent results (e.g., `torch.manual_seed()` or `np.random.seed()`) and If using a pre-trained model, include the instructions for downloading or specifying the model path.
 - **Submission Limits**:
-   - Teams or individuals can submit **up to 4 submissions per day**. 
+   - Teams or individuals can submit **up to 6 submissions per day**. 
    - Multiple submissions are allowed, but only the **best-performing** model will count toward the leaderboard.
 - **Note:** Use `zipthefolder.py` to create submission.gz from submission folder for submission to hugging face.
 ---
