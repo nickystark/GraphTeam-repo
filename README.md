@@ -6,7 +6,7 @@ Your Exam Submission Consists of 2 parts:
 The name of the team in the submission [Form](https://docs.google.com/forms/d/e/1FAIpQLScRelE-v612ZP4PO_gsB5prTup3YWbhcWSFn6HM7l_3P5ilCA/viewform?usp=sharing&ouid=104681444587430158482) and in Hugging Face
 
 ### Rules for Participation  
-- Projects should be carried out in groups of 3 people. Only in case of well-motivated reasons you are allowed to do the hackathon in a group of less than 3 people. You should get the approval of the Professor, first.
+- Projects should be carried out in groups of 2 people.
 - Submissions must not use any copyrighted, proprietary, or closed-source data or content.  
 - Participants are restricted to using only the datasets provided for training.  
 - Submissions can be novel solutions or modifications of existing approaches, with clear references for prior work.  
