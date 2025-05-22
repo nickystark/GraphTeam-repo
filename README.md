@@ -1,4 +1,4 @@
-Please check the [Competition Website](https://sites.google.com/view/hackathongraphnoisylabels/home) for the set of Rules and Instructions on how to submit your exam. 
+<--Please check the [Competition Website](https://sites.google.com/view/hackathongraphnoisylabels/home) for the set of Rules and Instructions on how to submit your exam. 
 
 Your Exam Submission Consists of 2 parts:
 1) Submit your  solutions to the [Hugging Face competition space](https://huggingface.co/spaces/examhackaton/GraphClassificationNoisyLabels) that hosts the challenge.
@@ -9,7 +9,7 @@ The name of the team in the submission [Form](https://docs.google.com/forms/d/e/
 - Projects should be carried out in groups of 2 people.
 - Submissions must not use any copyrighted, proprietary, or closed-source data or content.  
 - Participants are restricted to using only the datasets provided for training.  
-- Submissions can be novel solutions or modifications of existing approaches, with clear references for prior work.  
+- Submissions can be novel solutions or modifications of existing approaches, with clear references for prior work.  -->
 #### Submission Details for you GitHub Repo
    - `All submissions must follow the file and folder structure below:  
    
