@@ -161,13 +161,22 @@ def main(args):
     # If train_path is provided, train the model
     if args.train_path:
         train_dataset = GraphDataset(args.train_path, transform=add_zeros)
-        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+        val_size = int(0.2 * len(full_dataset))
+        train_size = len(full_dataset) - val_size
+        generator = torch.Generator().manual_seed(12)
+        train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size], generator=generator)
 
+        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+        val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
+        
+   
         # Training loop
         num_epochs = args.epochs
-        best_accuracy = 0.0
+        best_val_accuracy = 0.0
         train_losses = []
         train_accuracies = []
+        val_losses = []
+        val_accuracies = []
 
         # Calculate intervals for saving checkpoints
         if num_checkpoints > 1:
@@ -182,22 +191,24 @@ def main(args):
                 checkpoint_path=os.path.join(checkpoints_folder, f"model_{test_dir_name}"),
                 current_epoch=epoch
             )
-            train_acc, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
-            print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}")
-            
-            # Save logs for training progress
+            val_loss,val_acc = evaluate(val_loader, model, device, calculate_accuracy=True)
+
+            print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}")
+            logging.info(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}")
+
             train_losses.append(train_loss)
             train_accuracies.append(train_acc)
-            logging.info(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}")
+            val_losses.append(val_loss)
+            val_accuracies.append(val_acc)
 
-            # Save best model
-            if train_acc > best_accuracy:
-                best_accuracy = train_acc
+
+            if val_acc > best_val_accuracy:
+                best_val_accuracy = val_acc
                 torch.save(model.state_dict(), checkpoint_path)
                 print(f"Best model updated and saved at {checkpoint_path}")
 
-        # Plot training progress in current directory
         plot_training_progress(train_losses, train_accuracies, os.path.join(logs_folder, "plots"))
+        plot_training_progress(val_losses, val_accuracies, os.path.join(logs_folder, "plotsVal"))
 
     # Generate predictions for the test set using the best model
     model.load_state_dict(torch.load(checkpoint_path))
