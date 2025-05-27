@@ -13,7 +13,3 @@ def gzip_folder(folder_path, output_file):
         tar.add(folder_path, arcname=os.path.basename(folder_path))
     print(f"Folder '{folder_path}' has been compressed into '{output_file}'")
 
-# Example usage
-folder_path = "./testfolder/solution"            # Path to the folder you want to compress
-output_file = "./testfolder/solution.gz"         # Output .gz file name
-gzip_folder(folder_path, output_file)
