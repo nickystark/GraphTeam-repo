@@ -34,6 +34,9 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
         loss.backward()
         optimizer.step()
         total_loss += loss.item()
+        pred = output.argmax(dim=1)
+        correct += (pred == data.y).sum().item()
+        total += data.y.size(0)
     scheduler.step()
     # Save checkpoints if required
     if save_checkpoints:
@@ -186,7 +189,7 @@ def main(args):
             checkpoint_intervals = [num_epochs]
 
         for epoch in range(num_epochs):
-            train_loss = train(
+            train_loss, train_acc = train(
                 train_loader, model, optimizer, criterion, scheduler, device,
                 save_checkpoints=(epoch + 1 in checkpoint_intervals),
                 checkpoint_path=os.path.join(checkpoints_folder, f"model_{test_dir_name}"),
