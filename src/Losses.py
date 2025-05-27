@@ -4,17 +4,17 @@ import torch.nn.functional as F
 class GCODLoss(torch.nn.Module):
     def __init__(self, gamma=0.2):
         super(GCODLoss, self).__init__()
-        self.gamma = gamma  # hyperparametro che controlla il peso della parte robusta
+        self.gamma = gamma 
 
     def forward(self, logits, labels):
-        # Cross Entropy standard
+        # Cross Entropy potremmo provare anche ad utilizzare SCE qua
+        # IL reduction='none' è fondamentale restituisce la loss sull'intero batch e non la somma delle loss del batch
         ce_loss = F.cross_entropy(logits, labels, reduction='none')  # (batch_size,)
 
-        # Compute probabilities
         probs = F.softmax(logits, dim=1)
-        true_probs = probs[range(len(labels)), labels]  # Probabilità del target corretto
+        true_probs = probs[range(len(labels)), labels]  #restituse la probabilità delle classi corrette del batch
 
-        # Peso GCOD: bassa confidenza → peso basso
+        # Peso GCOD: vogliamo pesare di più i modelli con bassa confidenza
         weight = (true_probs.detach() ** self.gamma)
 
         loss = weight * ce_loss
