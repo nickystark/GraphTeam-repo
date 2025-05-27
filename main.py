@@ -160,7 +160,7 @@ def main(args):
 
     # If train_path is provided, train the model
     if args.train_path:
-        train_dataset = GraphDataset(args.train_path, transform=add_zeros)
+        full_dataset = GraphDataset(args.train_path, transform=add_zeros)
         val_size = int(0.2 * len(full_dataset))
         train_size = len(full_dataset) - val_size
         generator = torch.Generator().manual_seed(12)
