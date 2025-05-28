@@ -147,8 +147,7 @@ def objective(trial, path, n_epoch):
     JK = trial.suggest_categorical('JK', ['sum', 'last'])
     loss_name = trial.suggest_categorical('loss', ['SCELoss', 'GCODLoss'])
     readout = trial.suggest_categorical('readout', ['mean', 'attention', 'sum'])
-    #model_type = trial.suggest_categorical('model_type', ['gin', 'gin-virtual', 'gcn', 'gcn-virtual'])
-    model_type= 'gin_virtual'
+    model_type = trial.suggest_categorical('model_type', ['gin', 'gin-virtual', 'gcn', 'gcn-virtual'])
     res = trial.suggest_categorical('residual', [True, False])
     #lr = trial.suggest_float('lr', 1e-4, 1e-2, log=True)
     lr = 0.01
