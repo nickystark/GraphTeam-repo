@@ -118,13 +118,15 @@ def plot_training_progress(train_losses, train_accuracies, output_dir):
 def objective(trial):
     num_layers=trial.suggest_int('num_layers', 2, 7)
     weight_decay = trial.suggest_float('weight_decay', 1e-5, 1e-2, log=True)
-    num_layers=trial.suggest_int('num_layers', 2, 7)
     hidden_size = trial.suggest_int('hidden_size', 32, 256, step=32)
     dropout = trial.suggest_float('dropout', 0.0, 0.6, step=0.1)
-    sequence_length = trial.suggest_int('sequence_length', 20, 500, step=40)
-    batch_size = trial.suggest_int('batch_size', 32, 256, step=16)
+    batch_size = trial.suggest_int('batch_size', 32, 256, step=32)
     JK = trial.suggest_categorical('JK', ['sum','last'])
-    loss = trial.suggest_categorical('loss' ,['SCEloss','GCODloss']
+    loss = trial.suggest_categorical('loss' ,['SCEloss','GCODloss'])
+    readout = trial.suggest_categorical('readout' ,['mean','attention', 'sum'])
+    models = trial.suggest_categorical('models' ,['gin','gin-virtual', 'gcn', 'gcn-virtual'])
+    #residual = trial.suggest_boo
+    
     
 def main(args):
     # Get the directory where the main script is located
