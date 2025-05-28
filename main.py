@@ -138,7 +138,7 @@ def main(args):
     else:
         raise ValueError('Invalid GNN type')
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01) #weight_decay=0.0001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.w_d)
     scheduler = StepLR(optimizer, step_size=10, gamma=0.5)
     # criterion = torch.nn.CrossEntropyLoss()
     if args.baseline_mode == 2:
@@ -249,6 +249,8 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', type=int, default=10, help='number of epochs to train (default: 10)')
     parser.add_argument('--baseline_mode', type=int, default=1, help='1 for SIMMETRYC loss 2 for GCOD loss (default: 1)')
     parser.add_argument('--gamma', type=float, default=0.2, help='gamma only for GCODloss (default: 0.2)')
+    parser.add_argument('--lr', type=float, default=0.01, help='learning rate (default: 0.01)')
+    parser.add_argument('--w_d', type=float, default=0.00001, help='weight decay (default: 0.00001)')
     
     args = parser.parse_args()
     main(args)
