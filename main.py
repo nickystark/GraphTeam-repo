@@ -16,6 +16,7 @@ from src.Losses import SCELoss
 from torch.utils.data import random_split
 from torch.optim.lr_scheduler import StepLR
 
+import optuna
 # Set the random seed
 set_seed()
 
@@ -114,6 +115,17 @@ def plot_training_progress(train_losses, train_accuracies, output_dir):
     plt.savefig(os.path.join(output_dir, "training_progress.png"))
     plt.close()
 
+def objective(trial):
+    num_layers=trial.suggest_int('num_layers', 2, 7)
+    weight_decay = trial.suggest_float('weight_decay', 1e-5, 1e-2, log=True)
+    num_layers=trial.suggest_int('num_layers', 2, 7)
+    hidden_size = trial.suggest_int('hidden_size', 32, 256, step=32)
+    dropout = trial.suggest_float('dropout', 0.0, 0.6, step=0.1)
+    sequence_length = trial.suggest_int('sequence_length', 20, 500, step=40)
+    batch_size = trial.suggest_int('batch_size', 32, 256, step=16)
+    JK = trial.suggest_categorical('JK', ['sum','last'])
+    loss = trial.suggest_categorical('loss' ,['SCEloss','GCODloss']
+    
 def main(args):
     # Get the directory where the main script is located
     script_dir = os.path.dirname(os.path.abspath(__file__))
