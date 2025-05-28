@@ -197,7 +197,7 @@ def objective(trial, path, n_epoch):
     return val_f1
 
 
-def run_optuna(path):
+def run_optuna(path, n_epoch):
     study = optuna.create_study(direction='maximize')
     study.optimize(lambda trial: objective(trial,path,n_epoch), n_trials=1)
 
