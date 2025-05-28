@@ -182,7 +182,7 @@ def objective(trial):
     scheduler = StepLR(optimizer, step_size=10, gamma=0.5)
 
     
-    num_epochs = 3  # Puoi modificare questo valore
+    num_epochs = args.epochs
     for epoch in range(num_epochs):
         train_loss, train_acc = train(train_loader, model, optimizer, criterion, scheduler, device, False, None, epoch)
 
