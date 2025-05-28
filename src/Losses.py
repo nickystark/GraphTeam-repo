@@ -20,7 +20,7 @@ class GCODLoss(torch.nn.Module):
         loss = weight * ce_loss
         return loss.mean()
 
-class realGCODLoss(nn.Module):
+'''class realGCODLoss(nn.Module):
     def __init__(self, num_samples, num_classes, gamma=0.2, lambda_u=1.0, lambda_kl=0.1):
         super(GCODLoss, self).__init__()
         self.gamma = gamma
@@ -57,7 +57,7 @@ class realGCODLoss(nn.Module):
         L3 = F.kl_div(u_batch.log(), target_u, reduction='batchmean')
 
         total_loss = L1 + self.lambda_u * L2 + self.lambda_kl * L3
-        return total_loss
+        return total_loss '''
 
 class SCELoss(torch.nn.Module):
     def __init__(self, alpha=0.7, beta=0.3, num_classes=6):
