@@ -26,6 +26,8 @@ def add_zeros(data):
 def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch):
     model.train()
     total_loss = 0
+    correct = 0
+    total = 0
     for data in tqdm(data_loader, desc="Iterating training graphs", unit="batch"):
         data = data.to(device)
         optimizer.zero_grad()
