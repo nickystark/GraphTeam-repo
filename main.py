@@ -139,7 +139,8 @@ def plot_training_progress(train_losses, train_accuracies, output_dir):
 
 def objective(trial, path):
     num_layers = trial.suggest_int('num_layers', 2, 7)
-    weight_decay = trial.suggest_float('weight_decay', 1e-5, 1e-2, log=True)
+    #weight_decay = trial.suggest_float('weight_decay', 1e-5, 1e-2, log=True)
+    weight_decay = 0.00001
     hidden_size = trial.suggest_int('hidden_size', 32, 256, step=32)
     dropout = trial.suggest_float('dropout', 0.0, 0.6, step=0.1)
     batch_size = trial.suggest_int('batch_size', 32, 256, step=32)
@@ -148,7 +149,8 @@ def objective(trial, path):
     readout = trial.suggest_categorical('readout', ['mean', 'attention', 'sum'])
     model_type = trial.suggest_categorical('model_type', ['gin', 'gin-virtual', 'gcn', 'gcn-virtual'])
     res = trial.suggest_categorical('residual', [True, False])
-    lr = trial.suggest_float('lr', 1e-4, 1e-2, log=True)
+    #lr = trial.suggest_float('lr', 1e-4, 1e-2, log=True)
+    lr = 0.01
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -197,7 +199,7 @@ def objective(trial, path):
 
 def run_optuna(path):
     study = optuna.create_study(direction='maximize')
-    study.optimize(lambda trial: objective(trial,path), n_trials=5)
+    study.optimize(lambda trial: objective(trial,path), n_trials=1)
 
     print("Best trial:")
     trial = study.best_trial
@@ -206,6 +208,8 @@ def run_optuna(path):
     print("  Params: ")
     for key, value in trial.params.items():
         print(f"    {key}: {value}")
+
+    optuna.visualization.plot_param_importances(study)
         
     
 def main(args):
