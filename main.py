@@ -137,7 +137,7 @@ def plot_training_progress(train_losses, train_accuracies, output_dir):
     plt.close()
 
 
-def objective(trial):
+def objective(trial, path):
     num_layers = trial.suggest_int('num_layers', 2, 7)
     weight_decay = trial.suggest_float('weight_decay', 1e-5, 1e-2, log=True)
     hidden_size = trial.suggest_int('hidden_size', 32, 256, step=32)
@@ -152,7 +152,7 @@ def objective(trial):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    full_dataset = GraphDataset(args.train_path, transform=add_zeros)
+    full_dataset = GraphDataset(path, transform=add_zeros)
     val_size = int(0.2 * len(full_dataset))
     train_size = len(full_dataset) - val_size
     generator = torch.Generator().manual_seed(12)
@@ -176,13 +176,13 @@ def objective(trial):
     if loss_name == 'SCELoss':
         criterion = SCELoss()
     else:
-        criterion = GCODLoss(args.gamma)
+        criterion = GCODLoss(0.2)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
     scheduler = StepLR(optimizer, step_size=10, gamma=0.5)
 
     
-    num_epochs = args.epochs
+    num_epochs = 3
     for epoch in range(num_epochs):
         train_loss, train_acc = train(train_loader, model, optimizer, criterion, scheduler, device, False, None, epoch)
 
@@ -192,9 +192,9 @@ def objective(trial):
     return val_f1
 
 
-def run_optuna(args):
+def run_optuna(path):
     study = optuna.create_study(direction='maximize')
-    study.optimize(lambda trial: objective(trial), n_trials=5)
+    study.optimize(lambda trial: objective(trial,path), n_trials=5)
 
     print("Best trial:")
     trial = study.best_trial
