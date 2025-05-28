@@ -189,6 +189,9 @@ def objective(trial, path):
     
     val_f1 = f1(val_loader, model, device)
 
+    del model, optimizer, scheduler, train_loader, val_loader, criterion
+    torch.cuda.empty_cache()
+
     return val_f1
 
 
