@@ -137,7 +137,7 @@ def plot_training_progress(train_losses, train_accuracies, output_dir):
     plt.close()
 
 
-def objective(trial, path):
+def objective(trial, path, n_epoch):
     num_layers = trial.suggest_int('num_layers', 2, 7)
     #weight_decay = trial.suggest_float('weight_decay', 1e-5, 1e-2, log=True)
     weight_decay = 0.00001
@@ -184,7 +184,7 @@ def objective(trial, path):
     scheduler = StepLR(optimizer, step_size=10, gamma=0.5)
 
     
-    num_epochs = 3
+    num_epochs = n_epoch
     for epoch in range(num_epochs):
         train_loss, train_acc = train(train_loader, model, optimizer, criterion, scheduler, device, False, None, epoch)
 
@@ -199,7 +199,7 @@ def objective(trial, path):
 
 def run_optuna(path):
     study = optuna.create_study(direction='maximize')
-    study.optimize(lambda trial: objective(trial,path), n_trials=1)
+    study.optimize(lambda trial: objective(trial,path,n_epoch), n_trials=1)
 
     print("Best trial:")
     trial = study.best_trial
