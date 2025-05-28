@@ -119,17 +119,22 @@ def main(args):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
     num_checkpoints = args.num_checkpoints if args.num_checkpoints else 3
+
+    if args.residual == 1: 
+        res=True
+    else:
+        res=False
     
     
 
     if args.gnn == 'gin':
-        model = GNN(gnn_type = 'gin', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = False, JK='sum', residual=False, graph_pooling='attention' ).to(device)
+        model = GNN(gnn_type = 'gin', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = False, JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
     elif args.gnn == 'gin-virtual':
-        model = GNN(gnn_type = 'gin', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = True , JK='last', residual=True, graph_pooling='attention').to(device)
+        model = GNN(gnn_type = 'gin', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = True , JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
     elif args.gnn == 'gcn':
-        model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = False).to(device)
+        model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = False, JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
     elif args.gnn == 'gcn-virtual':
-        model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = True).to(device)
+        model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = True, JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
     else:
         raise ValueError('Invalid GNN type')
 
@@ -235,10 +240,15 @@ if __name__ == "__main__":
     parser.add_argument('--drop_ratio', type=float, default=0.5, help='dropout ratio (default: 0.5)')
     parser.add_argument('--num_layer', type=int, default=5, help='number of GNN message passing layers (default: 5)')
     parser.add_argument('--emb_dim', type=int, default=300, help='dimensionality of hidden units in GNNs (default: 300)')
+    parser.add_argument('--JK', type=str, default='last', help="Choose the JK setting ('last' or scale parse 'sum') (default: last")
+    parser.add_argument('--residual', type=int, default=0, help='Set 0 to disable residual connections, 1 to enable (default: 0)')
+    parser.add_argument('--readout', type=str, default="sum", choices=["sum", "mean", "max", "attention", "set2set"],
+    help="Type of readout function to use: 'sum', 'mean', 'max', 'attention', or 'set2set'."
+    )
     parser.add_argument('--batch_size', type=int, default=32, help='input batch size for training (default: 32)')
     parser.add_argument('--epochs', type=int, default=10, help='number of epochs to train (default: 10)')
-    parser.add_argument('--baseline_mode', type=int, default=1, help='1 per SIMMETRYC loss 2 per GCOD loss (default: 1)')
-    parser.add_argument('--gamma', type=float, default=0.2, help='gamma solo per GCODloss (default: 0.2)')
+    parser.add_argument('--baseline_mode', type=int, default=1, help='1 for SIMMETRYC loss 2 for GCOD loss (default: 1)')
+    parser.add_argument('--gamma', type=float, default=0.2, help='gamma only for GCODloss (default: 0.2)')
     
     args = parser.parse_args()
     main(args)
