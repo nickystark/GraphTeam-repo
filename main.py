@@ -139,17 +139,17 @@ def plot_training_progress(train_losses, train_accuracies, output_dir):
 
 def objective(trial, path, n_epoch):
     num_layers = trial.suggest_int('num_layers', 2, 7)
-    #weight_decay = trial.suggest_float('weight_decay', 1e-5, 1e-2, log=True)
-    weight_decay = 0.00001
     hidden_size = trial.suggest_int('hidden_size', 32, 256, step=32)
     dropout = trial.suggest_float('dropout', 0.0, 0.6, step=0.1)
     batch_size = trial.suggest_int('batch_size', 32, 256, step=32)
     JK = trial.suggest_categorical('JK', ['sum', 'last'])
     loss_name = trial.suggest_categorical('loss', ['SCELoss', 'GCODLoss'])
     readout = trial.suggest_categorical('readout', ['mean', 'attention', 'sum'])
-    #model_type = trial.suggest_categorical('model_type', ['gin', 'gin-virtual', 'gcn', 'gcn-virtual'])
-    model_type = 'gin-virtual'
+    model_type = trial.suggest_categorical('model_type', ['gin', 'gin-virtual', 'gcn', 'gcn-virtual'])
     res = trial.suggest_categorical('residual', [True, False])
+
+    #weight_decay = trial.suggest_float('weight_decay', 1e-5, 1e-2, log=True)
+    weight_decay = 0.00001
     #lr = trial.suggest_float('lr', 1e-4, 1e-2, log=True)
     lr = 0.01
 
@@ -351,13 +351,10 @@ if __name__ == "__main__":
     parser.add_argument('--lr', type=float, default=0.01, help='learning rate (default: 0.01)')
     parser.add_argument('--w_d', type=float, default=0.00001, help='weight decay (default: 0.00001)')
 
-    parser.add_argument('--optuna_tune', action='store_true', help='Esegui il tuning degli iperparametri con Optuna.')
 
     args = parser.parse_args()
     
-    if args.optuna_tune:
-        run_optuna(args)
-    else:
-        main(args)
+  
+    main(args)
     
 
