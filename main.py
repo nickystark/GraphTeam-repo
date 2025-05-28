@@ -1,6 +1,8 @@
 import argparse
 import os
 import torch
+import sklearn
+
 from torch_geometric.loader import DataLoader
 from src.loadData import GraphDataset
 from src.utils import set_seed
@@ -8,6 +10,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import logging
 from tqdm import tqdm
+
+from sklearn.metrics import f1_score
 
 from src.models import GNN 
 from src.Losses import GCODLoss
@@ -48,6 +52,23 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
         print(f"Checkpoint saved at {checkpoint_file}")
 
     return total_loss / len(data_loader) ,  correct / total
+
+def f1(val_loader, model, device):
+    model.eval()
+    all_preds = []
+    all_labels = []
+
+    with torch.no_grad():
+        for batch in val_loader:
+            batch = batch.to(device)
+            out = model(batch)
+            pred = out.argmax(dim=1).cpu().numpy()
+            label = batch.y.cpu().numpy()
+
+            all_preds.extend(pred)
+            all_labels.extend(label)
+
+    return f1_score(all_labels, all_preds, average='macro')
 
 def evaluate(data_loader, model, device,criterion, calculate_accuracy=False):
     model.eval()
@@ -166,14 +187,14 @@ def objective(trial):
         train_loss, train_acc = train(train_loader, model, optimizer, criterion, scheduler, device, False, None, epoch)
 
     
-    val_loss, val_acc = evaluate(val_loader, model, device, criterion, calculate_accuracy=True)
+    val_f1 = f1(val_loader, model, device)
 
-    return val_acc
+    return val_f1
 
 
 def run_optuna(args):
     study = optuna.create_study(direction='maximize')
-    study.optimize(lambda trial: objective(trial), n_trials=50)
+    study.optimize(lambda trial: objective(trial), n_trials=5)
 
     print("Best trial:")
     trial = study.best_trial
