@@ -44,11 +44,11 @@ class GNN(torch.nn.Module):
         elif self.graph_pooling == "max":
             self.pool = global_max_pool
         elif self.graph_pooling == "attention":
-            gate_nn = torch.nn.Sequential(torch.nn.Linear(emb_dim, 2*emb_dim), 
+            gate = torch.nn.Sequential(torch.nn.Linear(emb_dim, 2*emb_dim), 
                                           torch.nn.BatchNorm1d(2*emb_dim), 
                                           torch.nn.ReLU(), 
                                           torch.nn.Linear(2*emb_dim, 1))
-            self.pool = AttentionalAggregation(gate=gate_nn, aggr=SumAggregation())
+            self.pool = AttentionalAggregation(gate_nn=gate )
         elif self.graph_pooling == "set2set":
             self.pool = Set2Set(emb_dim, processing_steps = 2)
         else:
