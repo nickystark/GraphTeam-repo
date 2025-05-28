@@ -16,7 +16,7 @@ from src.Losses import SCELoss
 from torch.utils.data import random_split
 from torch.optim.lr_scheduler import StepLR
 
-#import optuna
+import optuna
 # Set the random seed
 set_seed()
 
@@ -115,18 +115,74 @@ def plot_training_progress(train_losses, train_accuracies, output_dir):
     plt.savefig(os.path.join(output_dir, "training_progress.png"))
     plt.close()
 
+
 def objective(trial):
-    num_layers=trial.suggest_int('num_layers', 2, 7)
+    num_layers = trial.suggest_int('num_layers', 2, 7)
     weight_decay = trial.suggest_float('weight_decay', 1e-5, 1e-2, log=True)
     hidden_size = trial.suggest_int('hidden_size', 32, 256, step=32)
     dropout = trial.suggest_float('dropout', 0.0, 0.6, step=0.1)
     batch_size = trial.suggest_int('batch_size', 32, 256, step=32)
-    JK = trial.suggest_categorical('JK', ['sum','last'])
-    loss = trial.suggest_categorical('loss' ,['SCEloss','GCODloss'])
-    readout = trial.suggest_categorical('readout' ,['mean','attention', 'sum'])
-    models = trial.suggest_categorical('models' ,['gin','gin-virtual', 'gcn', 'gcn-virtual'])
-    #residual = trial.suggest_boo
+    JK = trial.suggest_categorical('JK', ['sum', 'last'])
+    loss_name = trial.suggest_categorical('loss', ['SCELoss', 'GCODLoss'])
+    readout = trial.suggest_categorical('readout', ['mean', 'attention', 'sum'])
+    model_type = trial.suggest_categorical('model_type', ['gin', 'gin-virtual', 'gcn', 'gcn-virtual'])
+    res = trial.suggest_categorical('residual', [True, False])
+    lr = trial.suggest_float('lr', 1e-4, 1e-2, log=True)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    full_dataset = GraphDataset(args.train_path, transform=add_zeros)
+    val_size = int(0.2 * len(full_dataset))
+    train_size = len(full_dataset) - val_size
+    generator = torch.Generator().manual_seed(12)
+    train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size], generator=generator)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+
+    if model_type == 'gin':
+        model = GNN(gnn_type = 'gin', num_class = 6, num_layer = num_layers, emb_dim = hidden_size, drop_ratio = dropout, virtual_node = False , JK = JK, residual= res, graph_pooling=readout).to(device)
+    elif model_type == 'gin-virtual':
+        model = GNN(gnn_type = 'gin', num_class = 6, num_layer = num_layers, emb_dim = hidden_size, drop_ratio = dropout, virtual_node = True , JK = JK, residual= res, graph_pooling=readout).to(device)
+    elif model_type == 'gcn':
+        model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = num_layers, emb_dim = hidden_size, drop_ratio = dropout, virtual_node = False , JK = JK, residual= res, graph_pooling=readout).to(device)
+    elif model_type == 'gcn-virtual':
+        model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = num_layers, emb_dim = hidden_size, drop_ratio = dropout, virtual_node = True , JK = JK, residual= res, graph_pooling=readout).to(device)
+    else:
+        raise ValueError('Invalid GNN type')
+
+       
+    if loss_name == 'SCELoss':
+        criterion = SCELoss()
+    else:
+        criterion = GCODLoss(args.gamma)
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    scheduler = StepLR(optimizer, step_size=10, gamma=0.5)
+
     
+    num_epochs = 10  # Puoi modificare questo valore
+    for epoch in range(num_epochs):
+        train_loss, train_acc = train(train_loader, model, optimizer, criterion, scheduler, device, False, None, epoch)
+
+    
+    val_loss, val_acc = evaluate(val_loader, model, device, criterion, calculate_accuracy=True)
+
+    return val_acc
+
+
+def run_optuna(args):
+    study = optuna.create_study(direction='maximize')
+    study.optimize(lambda trial: objective(trial), n_trials=50)
+
+    print("Best trial:")
+    trial = study.best_trial
+
+    print(f"  Value: {trial.value}")
+    print("  Params: ")
+    for key, value in trial.params.items():
+        print(f"    {key}: {value}")
+        
     
 def main(args):
     # Get the directory where the main script is located
@@ -265,6 +321,14 @@ if __name__ == "__main__":
     parser.add_argument('--gamma', type=float, default=0.2, help='gamma only for GCODloss (default: 0.2)')
     parser.add_argument('--lr', type=float, default=0.01, help='learning rate (default: 0.01)')
     parser.add_argument('--w_d', type=float, default=0.00001, help='weight decay (default: 0.00001)')
-    
+
+    parser.add_argument('--optuna_tune', action='store_true', help='Esegui il tuning degli iperparametri con Optuna.')
+
     args = parser.parse_args()
-    main(args)
+    
+    if args.optuna_tune:
+        run_optuna(args)
+    else:
+        main(args)
+    
+
