@@ -5,4 +5,5 @@ matplotlib
 pandas
 tqdm
 argparse
-
+optuna
+sklearn
