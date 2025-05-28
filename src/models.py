@@ -1,8 +1,10 @@
 import torch
 from torch_geometric.nn import MessagePassing
-from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool, GlobalAttention, Set2Set
+from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool, Set2Set
 import torch.nn.functional as F
 from torch_geometric.nn.inits import uniform
+from torch_geometric.nn import AttentionalAggregation
+from torch_geometric.nn.aggr import SumAggregation
 
 from src.conv import GNN_node, GNN_node_Virtualnode
 
@@ -42,7 +44,11 @@ class GNN(torch.nn.Module):
         elif self.graph_pooling == "max":
             self.pool = global_max_pool
         elif self.graph_pooling == "attention":
-            self.pool = GlobalAttention(gate_nn = torch.nn.Sequential(torch.nn.Linear(emb_dim, 2*emb_dim), torch.nn.BatchNorm1d(2*emb_dim), torch.nn.ReLU(), torch.nn.Linear(2*emb_dim, 1)))
+            gate_nn = torch.nn.Sequential(torch.nn.Linear(emb_dim, 2*emb_dim), 
+                                          torch.nn.BatchNorm1d(2*emb_dim), 
+                                          torch.nn.ReLU(), 
+                                          torch.nn.Linear(2*emb_dim, 1))
+            self.pool = AttentionalAggregation(gate=gate_nn, aggr=SumAggregation())
         elif self.graph_pooling == "set2set":
             self.pool = Set2Set(emb_dim, processing_steps = 2)
         else:
