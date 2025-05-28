@@ -46,25 +46,29 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
         torch.save(model.state_dict(), checkpoint_file)
         print(f"Checkpoint saved at {checkpoint_file}")
 
-    return total_loss / len(data_loader)
+    return total_loss / len(data_loader) ,  correct / total
 
-def evaluate(data_loader, model, device, calculate_accuracy=False):
+def evaluate(data_loader, model, device,criterion, calculate_accuracy=False):
     model.eval()
     correct = 0
     total = 0
     predictions = []
+    total_loss = 0
     with torch.no_grad():
         for data in tqdm(data_loader, desc="Iterating eval graphs", unit="batch"):
             data = data.to(device)
             output = model(data)
             pred = output.argmax(dim=1)
-            predictions.extend(pred.cpu().numpy())
+
             if calculate_accuracy:
                 correct += (pred == data.y).sum().item()
                 total += data.y.size(0)
+                total_loss += criterion(output, data.y).item()
+            else:
+                predictions.extend(pred.cpu().numpy())
     if calculate_accuracy:
         accuracy = correct / total
-        return accuracy, predictions
+        return  total_loss / len(data_loader),accuracy
     return predictions
 
 def save_predictions(predictions, test_path):
@@ -92,17 +96,17 @@ def plot_training_progress(train_losses, train_accuracies, output_dir):
 
     # Plot loss
     plt.subplot(1, 2, 1)
-    plt.plot(epochs, train_losses, label="Training Loss", color='blue')
+    plt.plot(epochs, train_losses, label="Loss", color='blue')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.title('Training Loss per Epoch')
+    plt.title('Loss per Epoch')
 
     # Plot accuracy
     plt.subplot(1, 2, 2)
-    plt.plot(epochs, train_accuracies, label="Training Accuracy", color='green')
+    plt.plot(epochs, train_accuracies, label="Accuracy", color='green')
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
-    plt.title('Training Accuracy per Epoch')
+    plt.title('Accuracy per Epoch')
 
     # Save plots in the current directory
     os.makedirs(output_dir, exist_ok=True)
@@ -197,7 +201,7 @@ def main(args):
                 checkpoint_path=os.path.join(checkpoints_folder, f"model_{test_dir_name}"),
                 current_epoch=epoch
             )
-            val_loss,val_acc = evaluate(val_loader, model, device, calculate_accuracy=True)
+            val_loss,val_acc = evaluate(val_loader, model, device, criterion, calculate_accuracy=True)
 
             print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}")
             logging.info(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}")
@@ -218,7 +222,7 @@ def main(args):
 
     # Generate predictions for the test set using the best model
     model.load_state_dict(torch.load(checkpoint_path))
-    predictions = evaluate(test_loader, model, device, calculate_accuracy=False)
+    predictions = evaluate(test_loader, model, device, criterion, calculate_accuracy=False)
     save_predictions(predictions, args.test_path)
 
 if __name__ == "__main__":
