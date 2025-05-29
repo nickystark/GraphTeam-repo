@@ -295,7 +295,7 @@ def main(args):
             criterion = TruncatedLoss(train_size)
         else:
             if args.weight == 1:
-                criterion = SCELoss(args.alfa, args.beta, weight)
+                criterion = SCELoss(args.alfa, args.beta, 6, weight)
             else:
                 criterion = SCELoss(args.alfa, args.beta)
 
