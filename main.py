@@ -17,6 +17,7 @@ from src.models import GNN
 from src.gin_normal import GNN_Costume
 from src.Losses import GCODLoss
 from src.Losses import SCELoss
+from src.Losses import TruncatedLoss
 
 from torch.utils.data import random_split
 from torch.optim.lr_scheduler import StepLR
@@ -272,32 +273,31 @@ def main(args):
     test_dataset = GraphDataset(args.test_path, transform=add_zeros)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
 
-    if args.weight == 1:
+ 
+    
+    # If train_path is provided, train the model
+    if args.train_path:
         full_dataset = GraphDataset(args.train_path, transform=add_zeros)
         all_labels = [full_dataset[i].y.item() for i in range(len(full_dataset))]
         all_labels = torch.tensor(all_labels)
-        num_classes = len(torch.unique(all_labels))
+        #num_classes = len(torch.unique(all_labels))
         class_counts = torch.bincount(all_labels, minlength=num_classes)
         total = class_counts.sum()
         weights = total / (num_classes * class_counts)
         print(weights)
         weight = weights.to(torch.float32)
-
-    if args.baseline_mode == 2:
-        criterion = GCODLoss(args.gamma)
-    else:
-        if args.weight == 1:
-            criterion = SCELoss(args.alfa, args.beta, weight)
-        else:
-            criterion = SCELoss(args.alfa, args.beta)
-    
-    # If train_path is provided, train the model
-    if args.train_path:
-        full_dataset = GraphDataset(args.train_path, transform=add_zeros)
         val_size = int(args.val_test * len(full_dataset))
         train_size = len(full_dataset) - val_size
         generator = torch.Generator().manual_seed(12)
         train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size], generator=generator)
+
+        if args.baseline_mode == 2:
+            criterion = TruncatedLoss(train_size)
+        else:
+            if args.weight == 1:
+                criterion = SCELoss(args.alfa, args.beta, weight)
+            else:
+                criterion = SCELoss(args.alfa, args.beta)
 
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
