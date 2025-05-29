@@ -157,7 +157,7 @@ def objective(trial, path, n_epoch):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     full_dataset = GraphDataset(path, transform=add_zeros)
-    val_size = int(0.2 * len(full_dataset))
+    val_size = int(args.val * len(full_dataset))
     train_size = len(full_dataset) - val_size
     generator = torch.Generator().manual_seed(12)
     train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size], generator=generator)
@@ -341,6 +341,8 @@ def main(args):
     model.load_state_dict(torch.load(checkpoint_path))
     predictions = evaluate(test_loader, model, device, criterion, calculate_accuracy=False)
     save_predictions(predictions, args.test_path)
+    del model, optimizer, scheduler, train_loader, val_loader, criterion
+    torch.cuda.empty_cache()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train and evaluate GNN models on graph datasets.")
@@ -365,7 +367,8 @@ if __name__ == "__main__":
     parser.add_argument('--beta', type=float, default=0.3, help='beta only for SCEloss (default: 0.3)')
     parser.add_argument('--lr', type=float, default=0.01, help='learning rate (default: 0.01)')
     parser.add_argument('--w_d', type=float, default=0.00001, help='weight decay (default: 0.00001)')
-
+    parser.add_argument('--val_test', type=float, default=0.2, help='learning rate (default: 0.2)')
+    
 
     args = parser.parse_args()
     
