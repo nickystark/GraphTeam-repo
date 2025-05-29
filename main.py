@@ -249,7 +249,7 @@ def main(args):
         #criterion = NoisyCrossEntropyLoss(args.noise_prob)
         criterion = GCODLoss(args.gamma)
     else:
-        criterion = SCELoss()
+        criterion = SCELoss(args.alfa, args.beta)
 
 
     # Identify dataset folder (A, B, C, or D)
@@ -361,6 +361,8 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', type=int, default=10, help='number of epochs to train (default: 10)')
     parser.add_argument('--baseline_mode', type=int, default=1, help='1 for SIMMETRYC loss 2 for GCOD loss (default: 1)')
     parser.add_argument('--gamma', type=float, default=0.2, help='gamma only for GCODloss (default: 0.2)')
+    parser.add_argument('--alfa', type=float, default=0.7, help='alfa only for SCEloss (default: 0.7)')
+    parser.add_argument('--beta', type=float, default=0.3, help='beta only for SCEloss (default: 0.3)')
     parser.add_argument('--lr', type=float, default=0.01, help='learning rate (default: 0.01)')
     parser.add_argument('--w_d', type=float, default=0.00001, help='weight decay (default: 0.00001)')
 
