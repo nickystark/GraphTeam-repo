@@ -246,13 +246,6 @@ def main(args):
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.w_d)
     scheduler = StepLR(optimizer, step_size=10, gamma=0.5)
    
-    if args.baseline_mode == 2:
-        
-        criterion = GCODLoss(args.gamma)
-    else:
-        if args.weight == 1 criterion = SCELoss(args.alfa, args.beta, weight)
-        criterion = SCELoss(args.alfa, args.beta)
-
 
     # Identify dataset folder (A, B, C, or D)
     test_dir_name = os.path.basename(os.path.dirname(args.test_path))
@@ -290,11 +283,12 @@ def main(args):
         weight = weights.to(torch.float32)
 
     if args.baseline_mode == 2:
-        
         criterion = GCODLoss(args.gamma)
     else:
-        if args.weight == 1 criterion = SCELoss(args.alfa, args.beta, weight)
-        criterion = SCELoss(args.alfa, args.beta)
+        if args.weight == 1:
+            criterion = SCELoss(args.alfa, args.beta, weight=weight)
+        else:
+            criterion = SCELoss(args.alfa, args.beta)
     
     # If train_path is provided, train the model
     if args.train_path:
