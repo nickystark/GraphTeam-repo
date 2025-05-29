@@ -1,6 +1,7 @@
 import torch 
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 
 class GCODLoss(torch.nn.Module):
     def __init__(self, gamma=0.2):
@@ -45,10 +46,10 @@ class SCELoss(torch.nn.Module):
 
         return self.alpha * ce_loss + self.beta * rce_loss
 
-class TruncatedLoss(nn.Module):
+class DynamicGCLoss(nn.Module):
 
-    def __init__(self, q=0.7, k=0.5, trainset_size=50000):
-        super(TruncatedLoss, self).__init__()
+    def __init__(self, q=0.7, k=0.5, trainset_size):
+        super(DynamicGCLoss, self).__init__()
         self.q = q
         self.k = k
         self.weight = torch.nn.Parameter(data=torch.ones(trainset_size, 1), requires_grad=False)
@@ -59,7 +60,10 @@ class TruncatedLoss(nn.Module):
 
         loss = ((1-(Yg**self.q))/self.q)*self.weight[indexes] - ((1-(self.k**self.q))/self.q)*self.weight[indexes]
         loss = torch.mean(loss)
-
+        
+    def update_q(self, new_q):
+        self.q = new_q
+        
         return loss
 
     def update_weight(self, logits, targets, indexes):
