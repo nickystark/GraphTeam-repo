@@ -280,7 +280,7 @@ def main(args):
         full_dataset = GraphDataset(args.train_path, transform=add_zeros)
         all_labels = [full_dataset[i].y.item() for i in range(len(full_dataset))]
         all_labels = torch.tensor(all_labels)
-        #num_classes = len(torch.unique(all_labels))
+        num_classes = len(torch.unique(all_labels))
         class_counts = torch.bincount(all_labels, minlength=num_classes)
         total = class_counts.sum()
         weights = total / (num_classes * class_counts)
