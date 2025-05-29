@@ -180,6 +180,7 @@ def objective(trial, path, n_epoch):
 
        
     if loss_name == 'SCELoss':
+    
         criterion = SCELoss()
     else:
         criterion = GCODLoss(0.2)
@@ -244,11 +245,12 @@ def main(args):
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.w_d)
     scheduler = StepLR(optimizer, step_size=10, gamma=0.5)
-    # criterion = torch.nn.CrossEntropyLoss()
+   
     if args.baseline_mode == 2:
-        #criterion = NoisyCrossEntropyLoss(args.noise_prob)
+        
         criterion = GCODLoss(args.gamma)
     else:
+        if args.weight == 1 criterion = SCELoss(args.alfa, args.beta, weight)
         criterion = SCELoss(args.alfa, args.beta)
 
 
@@ -277,6 +279,23 @@ def main(args):
     test_dataset = GraphDataset(args.test_path, transform=add_zeros)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False)
 
+    if args.weight == 1:
+    
+        all_labels = [dataset[i].y.item() for i in range(len(dataset))]
+        all_labels = torch.tensor(all_labels)
+        num_classes = len(torch.unique(all_labels))
+        class_counts = torch.bincount(all_labels, minlength=num_classes)
+        total = class_counts.sum()
+        weights = total / (num_classes * class_counts)
+        weight = weights.to(torch.float32)
+
+    if args.baseline_mode == 2:
+        
+        criterion = GCODLoss(args.gamma)
+    else:
+        if args.weight == 1 criterion = SCELoss(args.alfa, args.beta, weight)
+        criterion = SCELoss(args.alfa, args.beta)
+    
     # If train_path is provided, train the model
     if args.train_path:
         full_dataset = GraphDataset(args.train_path, transform=add_zeros)
@@ -368,6 +387,8 @@ if __name__ == "__main__":
     parser.add_argument('--lr', type=float, default=0.01, help='learning rate (default: 0.01)')
     parser.add_argument('--w_d', type=float, default=0.00001, help='weight decay (default: 0.00001)')
     parser.add_argument('--val_test', type=float, default=0.2, help='learning rate (default: 0.2)')
+    parser.add_argument('--weight', type=int, default=0, help='loss with weight (default: 0)')
+    
     
 
     args = parser.parse_args()
