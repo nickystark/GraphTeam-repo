@@ -238,7 +238,7 @@ def main(args):
     elif args.gnn == 'gcn-virtual':
         model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = True, JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
     elif args.gnn == 'simple_gin':
-        model = GNN_Costume(  num_class = 6, num_layer = num_layers, emb_dim = hidden_size, drop_ratio = dropout, JK = JK, residual= res, graph_pooling=readout).to(device)
+        model = GNN_Costume(  num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio , JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
     else:
         raise ValueError('Invalid GNN type')
 
