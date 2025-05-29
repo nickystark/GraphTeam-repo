@@ -14,6 +14,7 @@ from tqdm import tqdm
 from sklearn.metrics import f1_score
 
 from src.models import GNN 
+from src.gin_normal import GNN_Costume
 from src.Losses import GCODLoss
 from src.Losses import SCELoss
 
@@ -172,7 +173,9 @@ def objective(trial, path, n_epoch):
         model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = num_layers, emb_dim = hidden_size, drop_ratio = dropout, virtual_node = False , JK = JK, residual= res, graph_pooling=readout).to(device)
     elif model_type == 'gcn-virtual':
         model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = num_layers, emb_dim = hidden_size, drop_ratio = dropout, virtual_node = True , JK = JK, residual= res, graph_pooling=readout).to(device)
-    else:
+    elif model_type == 'simple_gin':
+        model = GNN_Costume(  num_class = 6, num_layer = num_layers, emb_dim = hidden_size, drop_ratio = dropout, JK = JK, residual= res, graph_pooling=readout).to(device)
+    else :
         raise ValueError('Invalid GNN type')
 
        
@@ -234,6 +237,8 @@ def main(args):
         model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = False, JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
     elif args.gnn == 'gcn-virtual':
         model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = True, JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
+    elif model_type == 'simple_gin':
+        model = GNN_Costume(  num_class = 6, num_layer = num_layers, emb_dim = hidden_size, drop_ratio = dropout, JK = JK, residual= res, graph_pooling=readout).to(device)
     else:
         raise ValueError('Invalid GNN type')
 
@@ -306,20 +311,28 @@ def main(args):
                 current_epoch=epoch
             )
             val_loss,val_acc = evaluate(val_loader, model, device, criterion, calculate_accuracy=True)
+            val_f1 = f1(val_loader, model, device)
 
-            print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}")
-            logging.info(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}")
+            print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f},val_f1_score: {val_f1:.4f}")
+            logging.info(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f},val_f1_score: {val_f1:.4f}")
 
             train_losses.append(train_loss)
             train_accuracies.append(train_acc)
             val_losses.append(val_loss)
             val_accuracies.append(val_acc)
+            patience=10
 
-
-            if val_acc > best_val_accuracy:
-                best_val_accuracy = val_acc
+            if val_f1 > best_val_accuracy:
+                best_val_accuracy = val_f1
+                early_stopping_counter = 0
                 torch.save(model.state_dict(), checkpoint_path)
                 print(f"Best model updated and saved at {checkpoint_path}")
+            else :  
+                early_stopping_counter += 1
+                print(f"EarlyStopping counter: {early_stopping_counter}/{patience}")
+                if early_stopping_counter >= patience:
+                    print("Early stopping triggered.")
+                    break
 
         plot_training_progress(train_losses, train_accuracies, os.path.join(logs_folder, "plots"))
         plot_training_progress(val_losses, val_accuracies, os.path.join(logs_folder, "plotsVal"))
