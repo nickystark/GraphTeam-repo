@@ -278,18 +278,12 @@ def main(args):
     # If train_path is provided, train the model
     if args.train_path:
         full_dataset = GraphDataset(args.train_path, transform=add_zeros)
-        all_labels = [full_dataset[i].y.item() for i in range(len(full_dataset))]
-        all_labels = torch.tensor(all_labels)
-        num_classes = len(torch.unique(all_labels))
-        class_counts = torch.bincount(all_labels, minlength=num_classes)
-        total = class_counts.sum()
-        weights = total / (num_classes * class_counts)
-        print(weights)
-        weight = weights.to(torch.float32)
         val_size = int(args.val_test * len(full_dataset))
         train_size = len(full_dataset) - val_size
         generator = torch.Generator().manual_seed(12)
         train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size], generator=generator)
+
+        weight = tensor([1.3773, 0.9781, 0.5685, 0.9495, 0.9572, 2.5337])
 
         if args.baseline_mode == 2:
             criterion = TruncatedLoss(train_size)
