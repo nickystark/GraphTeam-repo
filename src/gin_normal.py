@@ -26,7 +26,7 @@ class SimpleGINConv(MessagePassing):
 
 ### GNN wrapper
 class GNN_Costume(torch.nn.Module):
-    def __init__(self, num_layer, emb_dim, num_class, drop_ratio=0.5, JK="last", residual=False, graph_pooling="mean"):
+    def __init__(self, num_class, num_layer, emb_dim, drop_ratio=0.5, JK="last", residual=False, graph_pooling="mean"):
         super(GNN_Costume, self).__init__()
 
         self.num_layer = num_layer
