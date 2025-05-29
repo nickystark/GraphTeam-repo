@@ -287,7 +287,7 @@ def main(args):
         criterion = GCODLoss(args.gamma)
     else:
         if args.weight == 1:
-            criterion = SCELoss(args.alfa, args.beta, weight=weight)
+            criterion = SCELoss(args.alfa, args.beta, weight)
         else:
             criterion = SCELoss(args.alfa, args.beta)
     
