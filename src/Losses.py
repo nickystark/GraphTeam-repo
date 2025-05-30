@@ -105,5 +105,40 @@ class DynamicGCLoss(nn.Module):
         return 0.5 * ce_loss + 0.5 * dynamic_loss
 '''
 
+class SCELossWithMAE(torch.nn.Module):
+    def __init__(self, alpha=0.1, beta=1.0, gamma=1.0, num_classes=6, smoothing=0.1, class_weights=None):
+        super(SCELossWithMAE, self).__init__()
+        self.alpha = alpha
+        self.beta = beta
+        self.gamma = gamma
+        self.num_classes = num_classes
+        self.smoothing = smoothing
         
+        if class_weights is not None:
+            self.ce = torch.nn.CrossEntropyLoss(weight=class_weights)
+        else:
+            self.ce = torch.nn.CrossEntropyLoss()
+
+    def smooth_one_hot(self, targets):
+        confidence = 1.0 - self.smoothing
+        smoothing_value = self.smoothing / (self.num_classes - 1)
+        one_hot = torch.full((targets.size(0), self.num_classes), smoothing_value).to(targets.device)
+        one_hot.scatter_(1, targets.unsqueeze(1), confidence)
+        return one_hot
+
+    def forward(self, logits, targets):
+        ce_loss = self.ce(logits, targets)
+
+        probs = torch.softmax(logits, dim=1)
+        
+        # Soft label
+        soft_targets = self.smooth_one_hot(targets)
+
+        # RCE: usa soft target invece che hard one-hot
+        rce_loss = (-probs * torch.log(torch.clamp(soft_targets, min=1e-4))).sum(dim=1).mean()
+
+        # MAE: distanza tra predizione e soft label
+        mae = torch.nn.functional.l1_loss(probs, soft_targets)
+
+        return self.alpha * ce_loss + self.beta * rce_loss + self.gamma * mae
 
