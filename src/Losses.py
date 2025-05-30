@@ -29,7 +29,7 @@ class SCELoss(torch.nn.Module):
         return self.alpha * ce_loss + self.beta * rce_loss
 
 class DynamicGCLoss(nn.Module):
-    def __init__(self, trainset_size, device, q=0.3, k=0.7):
+    def __init__(self, trainset_size, device, q=0.1, k=0.9):
         super(DynamicGCLoss, self).__init__()
         self.q = q
         self.k = k
@@ -52,7 +52,8 @@ class DynamicGCLoss(nn.Module):
         p = F.softmax(logits, dim=1)
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
         Lq = (1 - Yg**self.q) / self.q
-
+        print("Lq mean:", Lq.mean().item(), "Lqk value:", Lqk[0].item())
+        print("Yg mean:", Yg.mean().item(), "max:", Yg.max().item())
         # Crea un tensore delle dimensioni di Lq e lo riempe di un lavore costante Lq(k) la cosidetta soglia
         Lqk = torch.full_like(Lq, fill_value=(1 - self.k**self.q) / self.q) 
 
