@@ -210,15 +210,11 @@ def main(args):
         generator = torch.Generator().manual_seed(12)
         train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size], generator=generator)
 
-        weight = tensor([1.3773, 0.9781, 0.5685, 0.9495, 0.9572, 2.5337])
+        #weight = tensor([1.3773, 0.9781, 0.5685, 0.9495, 0.9572, 2.5337])
 
-        if args.baseline_mode == 2:
-            criterion = SCELossWithMAE( alpha=0.1, beta=1.0, gamma=0.5, num_classes=6, smoothing=0.1)
-        else:
-            if args.weight == 1:
-                criterion = SCELoss(args.alfa, args.beta, 6, weight)
-            else:
-                criterion = SCELoss(args.alfa, args.beta)
+      
+        criterion = SCELossWithMAE( alpha=0.1, beta=1.0, gamma=0.5, num_classes=6, smoothing=0.1)
+   
 
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
