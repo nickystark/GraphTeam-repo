@@ -26,6 +26,9 @@ import math
 # Set the random seed
 set_seed()
 
+def schedule_k(epoch, max_epochs, start_k=0.3, end_k=0.5):
+    return start_k + (end_k - start_k) * (epoch / max_epochs)
+
 def anneal_q(epoch, max_epoch, q_min=0.1, q_max=0.7):
     return q_min + (q_max - q_min) * (epoch / max_epoch)
 
@@ -43,9 +46,10 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
 
     new_q = anneal_q(current_epoch + 1, max_epoch, 0.1, 0.7)
     criterion.update_q(new_q)
-
+    new_k = schedule_k(current_epoch + 1, max_epoch, 0.3, 0.5)
+    criterion.update_k(new_k)
     # Aggiorna le maschere dei pesi
-    if (current_epoch + 1) >= 5 and (current_epoch + 1) % 5 == 0:
+    if (current_epoch + 1) >= 2 and (current_epoch + 1) % 2 == 0:
         model.eval()
         with torch.no_grad():
             for data in data_loader:  
