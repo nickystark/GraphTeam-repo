@@ -258,11 +258,10 @@ def main(args):
         train_accuracies = []
         val_losses = []
         val_accuracies = []
-        if args.residual == 1: 
-            criterion = DynamicGCLoss(len(full_dataset), q=q_min, k=k_min, device = device)
-        else :
-            print('SCE')
-            criterion = SCELoss()
+
+        
+        criterion = DynamicGCLoss(len(full_dataset), q=q_min, k=k_min, device = device)
+      
 
         # Calculate intervals for saving checkpoints
         if num_checkpoints > 1:
