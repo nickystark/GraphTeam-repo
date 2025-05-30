@@ -41,8 +41,8 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
     total = 0
 
 
-    new_q = compute_q_log(current_epoch + 1, 100)
-    criterion.update_q(new_q)
+    #new_q = compute_q_log(current_epoch + 1, 100)
+    #criterion.update_q(new_q)
 
     # Aggiorna le maschere dei pesi
     if (current_epoch + 1) >= 5 and (current_epoch + 1) % 10 == 0:
@@ -266,7 +266,7 @@ def main(args):
                 current_epoch=epoch
             )
             val_loss,val_acc = evaluate(val_loader, model, device, criterion, calculate_accuracy=True)
-            val_f1 = f1(val_loader, model, device)
+            #val_f1 = f1(val_loader, model, device)
 
             print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f},val_f1_score: {val_f1:.4f}")
             logging.info(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f},val_f1_score: {val_f1:.4f}")
@@ -277,8 +277,8 @@ def main(args):
             val_accuracies.append(val_acc)
             patience=20
 
-            if val_f1 > best_val_accuracy:
-                best_val_accuracy = val_f1
+            if val_acc> best_val_accuracy:
+                best_val_accuracy =val_acc
                 early_stopping_counter = 0
                 torch.save(model.state_dict(), checkpoint_path)
                 print(f"Best model updated and saved at {checkpoint_path}")
