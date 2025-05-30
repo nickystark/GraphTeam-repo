@@ -26,7 +26,7 @@ import math
 # Set the random seed
 set_seed()
 
-def compute_q_log(t, T, q_min=0.4 , q_max=0.99):
+def compute_q_log(t, T, q_min=0.7 , q_max=0.99):
     return q_min + (q_max - q_min) * (math.log(1 + t) / math.log(1 + T))
 
 def add_zeros(data):
@@ -41,7 +41,7 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
     total = 0
 
 
-    new_q = compute_q_log(current_epoch + 1, max_epochs=100)
+    new_q = compute_q_log(current_epoch + 1, 100)
     criterion.update_q(new_q)
 
     # Aggiorna le maschere dei pesi
