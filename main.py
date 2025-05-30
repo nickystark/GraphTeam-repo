@@ -263,7 +263,7 @@ def main(args):
                 train_loader, model, optimizer, criterion, scheduler, device,
                 save_checkpoints=(epoch + 1 in checkpoint_intervals),
                 checkpoint_path=os.path.join(checkpoints_folder, f"model_{test_dir_name}"),
-                current_epoch=epoch, num_epochs
+                current_epoch=epoch, max_epoch=num_epochs
             )
             val_loss,val_acc = evaluate(val_loader, model, device, criterion, calculate_accuracy=True)
             #val_f1 = f1(val_loader, model, device)
