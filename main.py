@@ -66,7 +66,7 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
         loss = criterion(outputs, data.y )#, data.idx)
         loss.backward()
         optimizer.step()
-        scheduler.step()
+        
 
         total_loss += loss.item()
         pred = outputs.argmax(dim=1)
