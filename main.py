@@ -63,7 +63,7 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
         data = data.to(device)
         optimizer.zero_grad()
         outputs = model(data)
-        loss = criterion(outputs, data.y, data.idx)
+        loss = criterion(outputs, data.y )#, data.idx)
         loss.backward()
         optimizer.step()
         scheduler.step()
