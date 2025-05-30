@@ -42,15 +42,18 @@ class DynamicGCLoss(nn.Module):
         
         p = F.softmax(logits, dim=1)
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
+        Yg = torch.clamp(Yg, min=1e-6, max=1.0)
 
         #const_term = ((1 - self.k**self.q) / self.q)
         loss = ((1 - Yg**self.q) / self.q ) * self.weight[indexes]
         return torch.mean(loss)
 
-    def update_weight(self, logits, targets, indexes):
+    '''def update_weight(self, logits, targets, indexes):
         
-        p = F.softmax(logits, dim=1)
+        p  = F.softmax(logits, dim=1)
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
+        Yg = torch.clamp(Yg, min=1e-6, max=1.0)
+        
         Lq = (1 - Yg**self.q) / self.q
         
         # Crea un tensore delle dimensioni di Lq e lo riempe di un lavore costante Lq(k) la cosidetta soglia
@@ -60,7 +63,7 @@ class DynamicGCLoss(nn.Module):
         # Aggiorna i pesi solo dove Lq < Lqk, azzeriamo la loss quando Lq>Lq(k) esempi più incerti 
         condition = Lq < Lqk
         self.weight[indexes] = condition.float()
-        ''' print("Yg stats -> mean:", Yg.mean().item(), "max:", Yg.max().item())
+        print("Yg stats -> mean:", Yg.mean().item(), "max:", Yg.max().item())
         print("Lq stats -> mean:", Lq.mean().item(), "min:", Lq.min().item(), "max:", Lq.max().item())
         print("Lqk value:", Lqk_value)
         print("Active weights this batch:", condition.sum().item(), "/", condition.numel())'''
@@ -70,10 +73,11 @@ class DynamicGCLoss(nn.Module):
 
     def update_k(self, new_k):
         self.k = new_k
-'''
-    def update_weight_continuous(self, logits, targets, indexes):
+
+    def update_weight(self, logits, targets, indexes):
         p = F.softmax(logits, dim=1)
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
+        Yg = torch.clamp(Yg, min=1e-6, max=1.0)
         Lq = (1 - Yg**self.q) / self.q
 
         # Calcola la soglia Lq(k)
@@ -86,8 +90,8 @@ class DynamicGCLoss(nn.Module):
         new_weights = torch.sigmoid(-scale * (Lq - Lqk_value))
 
         self.weight[indexes] = new_weights
-        print("Average weight this batch:", new_weights.mean().item())
-'''
+        #print("Average weight this batch:", new_weights.mean().item())
+
 
 ''' def forward(self, logits, targets, indexes):
         p = F.softmax(logits, dim=1)
