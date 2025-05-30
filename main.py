@@ -241,7 +241,7 @@ def main(args):
         generator = torch.Generator().manual_seed(12)
         train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size], generator=generator)
         
-        criterion = DynamicGCLoss(len(full_dataset), device = device)
+        
         
 
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
@@ -257,6 +257,10 @@ def main(args):
         train_accuracies = []
         val_losses = []
         val_accuracies = []
+        if args.residual == 1: 
+            criterion = DynamicGCLoss(len(full_dataset), q=q_min, k=k_min, device = device)
+        else :
+            criterion = nn.CrossEntropyLoss()
 
         # Calculate intervals for saving checkpoints
         if num_checkpoints > 1:
@@ -273,7 +277,7 @@ def main(args):
             )
             val_loss,val_acc = evaluate(val_loader, model, device, criterion, calculate_accuracy=True)
             #val_f1 = f1(val_loader, model, device)
-
+            scheduler.step()
             print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}")
             logging.info(f"Epoch {epoch + 1}/{num_epochs}, Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}")
 
@@ -282,6 +286,7 @@ def main(args):
             val_losses.append(val_loss)
             val_accuracies.append(val_acc)
             patience=20
+            
 
             if val_acc> best_val_accuracy:
                 best_val_accuracy =val_acc
