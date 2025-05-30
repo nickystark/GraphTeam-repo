@@ -17,7 +17,7 @@ from src.models import GNN
 from src.gin_normal import GNN_Costume
 from src.Losses import SCELoss
 from src.Losses import DynamicGCLoss
-
+import torch.nn as nn
 from torch.utils.data import random_split
 from torch.optim.lr_scheduler import StepLR
 import math
@@ -236,9 +236,9 @@ def main(args):
         train_size = len(full_dataset) - val_size
         generator = torch.Generator().manual_seed(12)
         train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size], generator=generator)
-        print('mela')
+        
         criterion = DynamicGCLoss(len(full_dataset), device = device)
-        print('mela')
+        
 
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
