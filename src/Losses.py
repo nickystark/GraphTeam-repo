@@ -142,3 +142,11 @@ class SCELossWithMAE(torch.nn.Module):
 
         return self.alpha * ce_loss + self.beta * rce_loss + self.gamma * mae
 
+    def update_alfa(self, alfa):
+        self.alpha = alfa
+
+    def update_beta(self, beta):
+        self.beta = beta
+
+    def update_beta(self, gamma):
+        self.gamma = gamma
