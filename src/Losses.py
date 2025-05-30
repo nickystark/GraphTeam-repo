@@ -29,15 +29,15 @@ class SCELoss(torch.nn.Module):
         return self.alpha * ce_loss + self.beta * rce_loss
 
 class DynamicGCLoss(nn.Module):
-    def __init__(self, q=0.7, k=0.5, trainset_size=1, device):
+    def __init__(self, q=0.7, k=0.5, trainset_size=1):
         super(DynamicGCLoss, self).__init__()
         self.q = q
         self.k = k
         self.weight = torch.nn.Parameter(
-            data=torch.ones(trainset_size, 1), requires_grad=False , device=device  )
+            data=torch.ones(trainset_size, 1), requires_grad=False  )
 
     def forward(self, logits, targets, indexes):
-        indexes = indexes.to(self.weight.device)
+        
         p = F.softmax(logits, dim=1)
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
 
@@ -46,7 +46,7 @@ class DynamicGCLoss(nn.Module):
         return torch.mean(loss)
 
     def update_weight(self, logits, targets, indexes):
-        indexes = indexes.to(self.weight.device)
+        
         p = F.softmax(logits, dim=1)
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
         Lq = (1 - Yg**self.q) / self.q
