@@ -44,7 +44,7 @@ def schedule_k(epoch, max_epochs, k_start=0.5, k_end=0.3):
     return k_start + (k_end - k_start) * progress
 
 
-def anneal_q(epoch, max_epochs, q_start=0.2, q_end=0.9):
+def anneal_q(epoch, max_epochs, q_start=0.2, q_end=1):
     """
     Anneals 'q' from a high value (robust like MAE) to a lower value (closer to CE)
     over the training epochs, to transition from robustness to faster convergence.
@@ -73,8 +73,8 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
     total = 0
     
 
-    #new_q = anneal_q(current_epoch + 1, max_epoch, q_start, 0.1)
-    #criterion.update_q(new_q)
+    new_q = anneal_q(current_epoch + 1, max_epoch, q_start, 1)
+    criterion.update_q(new_q)
     #new_k = schedule_k(current_epoch + 1, max_epoch, k_start, 0.5)
     #criterion.update_k(new_k)
 
