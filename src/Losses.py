@@ -3,24 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 
-class GCODLoss(torch.nn.Module):
-    def __init__(self, gamma=0.2):
-        super(GCODLoss, self).__init__()
-        self.gamma = gamma 
-
-    def forward(self, logits, labels):
-        # Cross Entropy potremmo provare anche ad utilizzare SCE qua
-        # IL reduction='none' è fondamentale restituisce la loss sull'intero batch e non la somma delle loss del batch
-        ce_loss = F.cross_entropy(logits, labels, reduction='none')  # (batch_size,)
-
-        probs = F.softmax(logits, dim=1)
-        true_probs = probs[range(len(labels)), labels]  #restituse la probabilità delle classi corrette del batch
-
-        # Peso GCOD: vogliamo pesare di più i modelli con bassa confidenza
-        weight = (true_probs.detach() ** self.gamma)
-
-        loss = weight * ce_loss
-        return loss.mean()
 
 class SCELoss(torch.nn.Module):
     def __init__(self, alpha=0.7, beta=0.3, num_classes=6, class_weights=None):
@@ -47,34 +29,38 @@ class SCELoss(torch.nn.Module):
         return self.alpha * ce_loss + self.beta * rce_loss
 
 class DynamicGCLoss(nn.Module):
-
-    def __init__(self, q=0.7, k=0.5, trainset_size):
+    def __init__(self, q=0.7, k=0.5, trainset_size=1):
         super(DynamicGCLoss, self).__init__()
         self.q = q
         self.k = k
-        self.weight = torch.nn.Parameter(data=torch.ones(trainset_size, 1), requires_grad=False)
-             
+        self.weight = torch.nn.Parameter(
+            data=torch.ones(trainset_size, 1), requires_grad=False
+        )
+
     def forward(self, logits, targets, indexes):
         p = F.softmax(logits, dim=1)
-        Yg = torch.gather(p, 1, torch.unsqueeze(targets, 1))
+        Yg = torch.gather(p, 1, targets.unsqueeze(1))
 
-        loss = ((1-(Yg**self.q))/self.q)*self.weight[indexes] - ((1-(self.k**self.q))/self.q)*self.weight[indexes]
-        loss = torch.mean(loss)
-        
-    def update_q(self, new_q):
-        self.q = new_q
-        
-        return loss
+        const_term = ((1 - self.k**self.q) / self.q)
+        loss = ((1 - Yg**self.q) / self.q - const_term) * self.weight[indexes]
+        return torch.mean(loss)
 
     def update_weight(self, logits, targets, indexes):
         p = F.softmax(logits, dim=1)
-        Yg = torch.gather(p, 1, torch.unsqueeze(targets, 1))
-        Lq = ((1-(Yg**self.q))/self.q)
-        Lqk = np.repeat(((1-(self.k**self.q))/self.q), targets.size(0))
-        Lqk = torch.from_numpy(Lqk).type(torch.cuda.FloatTensor)
-        Lqk = torch.unsqueeze(Lqk, 1)
-        
+        Yg = torch.gather(p, 1, targets.unsqueeze(1))
+        Lq = (1 - Yg**self.q) / self.q
 
-        condition = torch.gt(Lqk, Lq)
-        self.weight[indexes] = condition.type(torch.cuda.FloatTensor)
+        # Crea un tensore delle dimensioni di Lq e lo riempe di un lavore costante Lq(k) la cosidetta soglia
+        Lqk = torch.full_like(Lq, fill_value=(1 - self.k**self.q) / self.q) 
+
+        # Aggiorna i pesi solo dove Lq < Lqk, azzeriamo la loss quando Lq>Lq(k) esempi più incerti 
+        condition = Lq < Lqk
+        self.weight[indexes] = condition.float()
+
+    def update_q(self, new_q):
+        self.q = new_q
+
+    def update_k(self, new_k):
+        self.k = new_k
+        
 
