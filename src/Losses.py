@@ -64,6 +64,12 @@ class DynamicGCLoss(nn.Module):
         print("Lq stats -> mean:", Lq.mean().item(), "min:", Lq.min().item(), "max:", Lq.max().item())
         print("Lqk value:", Lqk_value)
         print("Active weights this batch:", condition.sum().item(), "/", condition.numel())'''
+    
+    def update_q(self, new_q):
+        self.q = new_q
+
+    def update_k(self, new_k):
+        self.k = new_k
 '''
     def update_weight_continuous(self, logits, targets, indexes):
         p = F.softmax(logits, dim=1)
@@ -94,10 +100,6 @@ class DynamicGCLoss(nn.Module):
         # Peso per combinare le perdite, da sperimentare ad es. 0.5 e 0.5 o altri pesi
         return 0.5 * ce_loss + 0.5 * dynamic_loss
 '''
-    def update_q(self, new_q):
-        self.q = new_q
 
-    def update_k(self, new_k):
-        self.k = new_k
         
 
