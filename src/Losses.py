@@ -52,7 +52,7 @@ class DynamicGCLoss(nn.Module):
         p = F.softmax(logits, dim=1)
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
         Lq = (1 - Yg**self.q) / self.q
-        print("Yg mean:", Yg.mean().item(), "max:", Yg.max().item())
+        
         # Crea un tensore delle dimensioni di Lq e lo riempe di un lavore costante Lq(k) la cosidetta soglia
         Lqk_value = (1 - self.k**self.q) / self.q
         Lqk = torch.full_like(Lq, fill_value=Lqk_value) 
@@ -60,9 +60,9 @@ class DynamicGCLoss(nn.Module):
         # Aggiorna i pesi solo dove Lq < Lqk, azzeriamo la loss quando Lq>Lq(k) esempi più incerti 
         condition = Lq < Lqk
         self.weight[indexes] = condition.float()
-        print("Yg stats -> mean:", Yg.mean().item(), "max:", Yg.max().item())
+        ''' print("Yg stats -> mean:", Yg.mean().item(), "max:", Yg.max().item())
         print("Lq stats -> mean:", Lq.mean().item(), "min:", Lq.min().item(), "max:", Lq.max().item())
-        print("Lqk value:", Lqk_value)
+        print("Lqk value:", Lqk_value) '''
         print("Active weights this batch:", condition.sum().item(), "/", condition.numel())
     def update_q(self, new_q):
         self.q = new_q
