@@ -44,7 +44,7 @@ def schedule_k(epoch, max_epochs, k_start=0.5, k_end=0.3):
     return k_start + (k_end - k_start) * progress
 
 
-def anneal_q(epoch, max_epochs, q_start=0.2, q_end=0.6):
+def anneal_q(epoch, max_epochs, q_start=0.2, q_end=0.9):
     """
     Anneals 'q' from a high value (robust like MAE) to a lower value (closer to CE)
     over the training epochs, to transition from robustness to faster convergence.
@@ -67,20 +67,20 @@ def add_zeros(data):
 
 
 
-def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch, max_epoch, q_start, k_start, update):
+def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch, max_epoch, q_start, k_start, update, start_update):
     total_loss = 0
     correct = 0
     total = 0
     
 
-    new_q = anneal_q(current_epoch + 1, max_epoch, q_start, 0.1)
-    criterion.update_q(new_q)
-    new_k = schedule_k(current_epoch + 1, max_epoch, k_start, 0.5)
-    criterion.update_k(new_k)
+    #new_q = anneal_q(current_epoch + 1, max_epoch, q_start, 0.1)
+    #criterion.update_q(new_q)
+    #new_k = schedule_k(current_epoch + 1, max_epoch, k_start, 0.5)
+    #criterion.update_k(new_k)
 
     
     # Aggiorna le maschere dei pesi
-    if (current_epoch + 1) >= 20 and (current_epoch + 1) % update == 0:
+    if (current_epoch + 1) >= start_update and (current_epoch + 1) % update == 0:
         model.eval()
         with torch.no_grad():
             for data in data_loader:  
@@ -305,7 +305,8 @@ def main(args):
                 train_loader, model, optimizer, criterion, scheduler, device,
                 save_checkpoints=(epoch + 1 in checkpoint_intervals),
                 checkpoint_path=os.path.join(checkpoints_folder, f"model_{test_dir_name}"),
-                current_epoch=epoch, max_epoch=num_epochs, q_start=q_start, k_start=k_start, update=update_weight
+                current_epoch=epoch, max_epoch=num_epochs, q_start=q_start, k_start=k_start, update=update_weight,
+                start_update=args.start_update
             )
             val_loss,val_acc = evaluate(val_loader, model, device, criterion, calculate_accuracy=True)
             #val_f1 = f1(val_loader, model, device)
@@ -317,7 +318,7 @@ def main(args):
             train_accuracies.append(train_acc)
             val_losses.append(val_loss)
             val_accuracies.append(val_acc)
-            patience=20
+            patience=arg.patience
             
 
             if val_acc> best_val_accuracy:
@@ -365,8 +366,9 @@ if __name__ == "__main__":
     parser.add_argument('--q_start', type=float, default=0.1, help='q min for loss (default: 0.1)')
     parser.add_argument('--k_start', type=float, default=0.2, help='k_min for loss (default: 0.2)')
     parser.add_argument('--update', type=int, default=10, help='epoca in cui aggiornare la maschera per la DYGCE (default: 10)')
-    
-    
+    parser.add_argument('--start_update', type=int, default=20, help='start epoca (default: 10)')
+    parser.add_argument('--patience', type=int, default=20, help='start epoca (default: 20)')
+
     
 
     args = parser.parse_args()
