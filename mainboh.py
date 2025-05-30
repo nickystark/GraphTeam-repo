@@ -46,7 +46,7 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
         pred = output.argmax(dim=1)
         correct += (pred == data.y).sum().item()
         total += data.y.size(0)
-    scheduler.step()
+    
     # Save checkpoints if required
     if save_checkpoints:
         checkpoint_file = f"{checkpoint_path}_epoch_{current_epoch + 1}.pth"
@@ -140,13 +140,13 @@ def plot_training_progress(train_losses, train_accuracies, output_dir):
 
 
 def objective(trial, path, n_epoch):
-    num_layers = trial.suggest_int('num_layers', 2, 7)
-    hidden_size = trial.suggest_int('hidden_size', 32, 256, step=32)
-    dropout = trial.suggest_float('dropout', 0.0, 0.6, step=0.1)
-    batch_size = trial.suggest_int('batch_size', 32, 256, step=32)
+    num_layers = trial.suggest_int('num_layers', 3, 5)
+    hidden_size = trial.suggest_int('hidden_size', 32, 128, step=32)
+    dropout = trial.suggest_float('dropout', 0.4, 0.6, step=0.1)
+    batch_size = 64
     JK = trial.suggest_categorical('JK', ['sum', 'last'])
-    loss_name = trial.suggest_categorical('loss', ['SCELoss', 'GCODLoss'])
-    readout = trial.suggest_categorical('readout', ['mean', 'attention', 'sum'])
+    
+    readout = trial.suggest_categorical('readout', ['attention', 'sum'])
     model_type = trial.suggest_categorical('model_type', ['gin', 'gin-virtual', 'gcn', 'gcn-virtual'])
     res = trial.suggest_categorical('residual', [True, False])
 
@@ -180,14 +180,10 @@ def objective(trial, path, n_epoch):
         raise ValueError('Invalid GNN type')
 
        
-    if loss_name == 'SCELoss':
-    
-        criterion = SCELoss()
-    else:
-        criterion = GCODLoss(0.2)
+  
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-    scheduler = StepLR(optimizer, step_size=10, gamma=0.5)
+    
 
     
     num_epochs = n_epoch
