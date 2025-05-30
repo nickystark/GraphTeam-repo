@@ -64,6 +64,36 @@ class DynamicGCLoss(nn.Module):
         print("Lq stats -> mean:", Lq.mean().item(), "min:", Lq.min().item(), "max:", Lq.max().item())
         print("Lqk value:", Lqk_value)
         print("Active weights this batch:", condition.sum().item(), "/", condition.numel())'''
+'''
+    def update_weight_continuous(self, logits, targets, indexes):
+        p = F.softmax(logits, dim=1)
+        Yg = torch.gather(p, 1, targets.unsqueeze(1))
+        Lq = (1 - Yg**self.q) / self.q
+
+        # Calcola la soglia Lq(k)
+        Lqk_value = (1 - self.k**self.q) / self.q
+
+        # Ad esempio, usa una sigmoid per mappare Lq a un peso tra 0 e 1
+        # Maggiore è Lq, minore dovrebbe essere il peso.
+        # La funzione sigmoid può essere parametrizzata in modo da centrare la transizione attorno a Lqk_value.
+        scale = 10.0  # Un parametro da sperimentare.
+        new_weights = torch.sigmoid(-scale * (Lq - Lqk_value))
+
+        self.weight[indexes] = new_weights
+        print("Average weight this batch:", new_weights.mean().item())
+'''
+
+''' def forward(self, logits, targets, indexes):
+        p = F.softmax(logits, dim=1)
+        Yg = torch.gather(p, 1, targets.unsqueeze(1))
+        dynamic_loss = ((1 - Yg**self.q) / self.q) * self.weight[indexes]
+        dynamic_loss = torch.mean(dynamic_loss)
+    
+        ce_loss = F.cross_entropy(logits, targets)
+    
+        # Peso per combinare le perdite, da sperimentare ad es. 0.5 e 0.5 o altri pesi
+        return 0.5 * ce_loss + 0.5 * dynamic_loss
+'''
     def update_q(self, new_q):
         self.q = new_q
 
