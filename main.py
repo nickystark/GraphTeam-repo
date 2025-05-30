@@ -75,8 +75,8 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
 
     new_q = anneal_q(current_epoch + 1, max_epoch, q_start, 1)
     criterion.update_q(new_q)
-    #new_k = schedule_k(current_epoch + 1, max_epoch, k_start, 0.5)
-    #criterion.update_k(new_k)
+    new_k = schedule_k(current_epoch + 1, max_epoch, k_start, 0.5)
+    criterion.update_k(new_k)
 
     
     # Aggiorna le maschere dei pesi
