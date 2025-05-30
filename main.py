@@ -26,7 +26,7 @@ import math
 # Set the random seed
 set_seed()
 
-def schedule_k(epoch, max_epochs, k_start=0.3, k_end=0.5):
+def schedule_k(epoch, max_epochs, k_start=0.5, k_end=0.3):
     """
     Linear scheduling of 'k' from k_start to k_end over the training epochs.
     Useful for gradually relaxing the truncation threshold in losses like GCOD.
@@ -44,7 +44,7 @@ def schedule_k(epoch, max_epochs, k_start=0.3, k_end=0.5):
     return k_start + (k_end - k_start) * progress
 
 
-def anneal_q(epoch, max_epochs, q_start=0.2, q_end=0.7):
+def anneal_q(epoch, max_epochs, q_start=0.2, q_end=0.6):
     """
     Anneals 'q' from a high value (robust like MAE) to a lower value (closer to CE)
     over the training epochs, to transition from robustness to faster convergence.
