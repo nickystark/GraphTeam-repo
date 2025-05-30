@@ -37,6 +37,7 @@ class DynamicGCLoss(nn.Module):
             data=torch.ones(trainset_size, 1), requires_grad=False , device=device  )
 
     def forward(self, logits, targets, indexes):
+        indexes = indexes.to(self.weight.device)
         p = F.softmax(logits, dim=1)
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
 
@@ -45,6 +46,7 @@ class DynamicGCLoss(nn.Module):
         return torch.mean(loss)
 
     def update_weight(self, logits, targets, indexes):
+        indexes = indexes.to(self.weight.device)
         p = F.softmax(logits, dim=1)
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
         Lq = (1 - Yg**self.q) / self.q
