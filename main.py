@@ -279,8 +279,8 @@ def main(args):
    
         # Training loop
         num_epochs = args.epochs
-        q_min=args.q_min
-        k_min=args.k_min
+        q_start=args.q_start
+        k_start=args.k_start
         update_weight = args.update
         best_val_accuracy = 0.0
         train_losses = []
@@ -289,7 +289,7 @@ def main(args):
         val_accuracies = []
 
         
-        criterion = DynamicGCLoss(len(full_dataset), q=q_min, k=k_min, device = device)
+        criterion = DynamicGCLoss(len(full_dataset), q=q_start, k=k_start, device = device)
       
 
         # Calculate intervals for saving checkpoints
@@ -303,7 +303,7 @@ def main(args):
                 train_loader, model, optimizer, criterion, scheduler, device,
                 save_checkpoints=(epoch + 1 in checkpoint_intervals),
                 checkpoint_path=os.path.join(checkpoints_folder, f"model_{test_dir_name}"),
-                current_epoch=epoch, max_epoch=num_epochs, q_min=q_min, k_min=k_min, update=update_weight
+                current_epoch=epoch, max_epoch=num_epochs, q_start=q_start, k_start=k_start, update=update_weight
             )
             val_loss,val_acc = evaluate(val_loader, model, device, criterion, calculate_accuracy=True)
             #val_f1 = f1(val_loader, model, device)
@@ -360,8 +360,8 @@ if __name__ == "__main__":
     parser.add_argument('--lr', type=float, default=0.01, help='learning rate (default: 0.01)')
     parser.add_argument('--w_d', type=float, default=0.00001, help='weight decay (default: 0.00001)')
     parser.add_argument('--val_test', type=float, default=0.2, help='split val (default: 0.2)')
-    parser.add_argument('--q_mint', type=float, default=0.1, help='q min for loss (default: 0.1)')
-    parser.add_argument('--k_min', type=float, default=0.2, help='k_min for loss (default: 0.2)')
+    parser.add_argument('--q_start', type=float, default=0.1, help='q min for loss (default: 0.1)')
+    parser.add_argument('--k_start', type=float, default=0.2, help='k_min for loss (default: 0.2)')
     parser.add_argument('--update', type=int, default=10, help='epoca in cui aggiornare la maschera per la DYGCE (default: 10)')
     
     
