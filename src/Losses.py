@@ -59,6 +59,9 @@ class DynamicGCLoss(nn.Module):
         # Aggiorna i pesi solo dove Lq < Lqk, azzeriamo la loss quando Lq>Lq(k) esempi più incerti 
         condition = Lq < Lqk
         self.weight[indexes] = condition.float()
+        print("Yg stats -> mean:", Yg.mean().item(), "max:", Yg.max().item())
+        print("Lq stats -> mean:", Lq.mean().item(), "min:", Lq.min().item(), "max:", Lq.max().item())
+        print("Lqk value:", Lqk_value)
         print("Active weights this batch:", condition.sum().item(), "/", condition.numel())
     def update_q(self, new_q):
         self.q = new_q
