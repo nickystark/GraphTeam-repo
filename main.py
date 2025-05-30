@@ -260,7 +260,8 @@ def main(args):
         if args.residual == 1: 
             criterion = DynamicGCLoss(len(full_dataset), q=q_min, k=k_min, device = device)
         else :
-            criterion = nn.CrossEntropyLoss()
+            print('SCE')
+            criterion = SCELoss()
 
         # Calculate intervals for saving checkpoints
         if num_checkpoints > 1:
