@@ -80,7 +80,7 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
 
     
     # Aggiorna le maschere dei pesi
-    if (current_epoch + 1) >= update and (current_epoch + 1) % update == 0:
+    if (current_epoch + 1) >= 20 and (current_epoch + 1) % update == 0:
         model.eval()
         with torch.no_grad():
             for data in data_loader:  
