@@ -213,7 +213,7 @@ def main(args):
         weight = tensor([1.3773, 0.9781, 0.5685, 0.9495, 0.9572, 2.5337])
 
         if args.baseline_mode == 2:
-            criterion = SCELossWithMAE( alpha=0.1, beta=1.0, gamma=0.5, num_classes=6, smoothing=0.1):
+            criterion = SCELossWithMAE( alpha=0.1, beta=1.0, gamma=0.5, num_classes=6, smoothing=0.1)
         else:
             if args.weight == 1:
                 criterion = SCELoss(args.alfa, args.beta, 6, weight)
