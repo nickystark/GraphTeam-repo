@@ -29,7 +29,7 @@ class SCELoss(torch.nn.Module):
         return self.alpha * ce_loss + self.beta * rce_loss
 
 class DynamicGCLoss(nn.Module):
-    def __init__(self, trainset_size, device, q=0.7, k=0.5):
+    def __init__(self, trainset_size, device, q=0.3, k=0.7):
         super(DynamicGCLoss, self).__init__()
         self.q = q
         self.k = k
@@ -59,7 +59,7 @@ class DynamicGCLoss(nn.Module):
         # Aggiorna i pesi solo dove Lq < Lqk, azzeriamo la loss quando Lq>Lq(k) esempi più incerti 
         condition = Lq < Lqk
         self.weight[indexes] = condition.float()
-
+        print("Active weights this batch:", condition.sum().item(), "/", condition.numel())
     def update_q(self, new_q):
         self.q = new_q
 
