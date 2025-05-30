@@ -5,7 +5,7 @@ import numpy as np
 
 
 class SCELoss(torch.nn.Module):
-    def __init__(self, alpha=0.7, beta=0.3, num_classes=6, class_weights=None):
+    def __init__(self, alpha=0.1, beta=1.0, num_classes=6, class_weights=None):
         super(SCELoss, self).__init__()
         self.alpha = alpha
         self.beta = beta
