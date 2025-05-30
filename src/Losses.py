@@ -29,7 +29,7 @@ class SCELoss(torch.nn.Module):
         return self.alpha * ce_loss + self.beta * rce_loss
 
 class DynamicGCLoss(nn.Module):
-    def __init__(self, trainset_size, device, q=0.1, k=0.9):
+    def __init__(self, trainset_size, device, q=0.1, k=0.1):
         super(DynamicGCLoss, self).__init__()
         self.q = q
         self.k = k
@@ -43,8 +43,8 @@ class DynamicGCLoss(nn.Module):
         p = F.softmax(logits, dim=1)
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
 
-        const_term = ((1 - self.k**self.q) / self.q)
-        loss = ((1 - Yg**self.q) / self.q - const_term) * self.weight[indexes]
+        #const_term = ((1 - self.k**self.q) / self.q)
+        loss = ((1 - Yg**self.q) / self.q ) * self.weight[indexes]
         return torch.mean(loss)
 
     def update_weight(self, logits, targets, indexes):
