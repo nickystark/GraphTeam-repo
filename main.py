@@ -45,7 +45,7 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
     criterion.update_q(new_q)
 
     # Aggiorna le maschere dei pesi
-    if (current_epoch + 1) >= 5 and (current_epoch + 1) % 10 == 0:
+    if (current_epoch + 1) >= 5 and (current_epoch + 1) % 5 == 0:
         model.eval()
         with torch.no_grad():
             for data in data_loader:  
