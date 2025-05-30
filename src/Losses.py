@@ -35,7 +35,7 @@ class DynamicGCLoss(nn.Module):
         self.k = k
         self.trainset_size = trainset_size
         self.weight = torch.nn.Parameter(
-            data=torch.ones(trainset_size, 1), requires_grad=False, device=device)
+            data=torch.ones(trainset_size, 1), requires_grad=False).to(device)
 
     def forward(self, logits, targets, indexes):
         
