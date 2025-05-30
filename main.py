@@ -38,15 +38,15 @@ def add_zeros(data):
 
 
 
-def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch, max_epoch):
+def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch, max_epoch, q_min, k_min):
     total_loss = 0
     correct = 0
     total = 0
 
 
-    new_q = anneal_q(current_epoch + 1, max_epoch, 0.1, 0.7)
+    new_q = anneal_q(current_epoch + 1, max_epoch, q_min, 0.7)
     criterion.update_q(new_q)
-    new_k = schedule_k(current_epoch + 1, max_epoch, 0.3, 0.5)
+    new_k = schedule_k(current_epoch + 1, max_epoch, k_min, 0.5)
     criterion.update_k(new_k)
     # Aggiorna le maschere dei pesi
     if (current_epoch + 1) >= 2 and (current_epoch + 1) % 2 == 0:
@@ -250,6 +250,8 @@ def main(args):
    
         # Training loop
         num_epochs = args.epochs
+        q_min=args.q_min
+        k_min=args.k_min
         best_val_accuracy = 0.0
         train_losses = []
         train_accuracies = []
@@ -267,7 +269,7 @@ def main(args):
                 train_loader, model, optimizer, criterion, scheduler, device,
                 save_checkpoints=(epoch + 1 in checkpoint_intervals),
                 checkpoint_path=os.path.join(checkpoints_folder, f"model_{test_dir_name}"),
-                current_epoch=epoch, max_epoch=num_epochs
+                current_epoch=epoch, max_epoch=num_epochs, q_min=q_min, k_min=k_min
             )
             val_loss,val_acc = evaluate(val_loader, model, device, criterion, calculate_accuracy=True)
             #val_f1 = f1(val_loader, model, device)
@@ -322,7 +324,9 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', type=int, default=10, help='number of epochs to train (default: 10)')
     parser.add_argument('--lr', type=float, default=0.01, help='learning rate (default: 0.01)')
     parser.add_argument('--w_d', type=float, default=0.00001, help='weight decay (default: 0.00001)')
-    parser.add_argument('--val_test', type=float, default=0.2, help='learning rate (default: 0.2)')
+    parser.add_argument('--val_test', type=float, default=0.2, help='split val (default: 0.2)')
+    parser.add_argument('--q_mint', type=float, default=0.1, help='q min for loss (default: 0.1)')
+    parser.add_argument('--k_min', type=float, default=0.2, help='k_min for loss (default: 0.2)')
     
     
     
