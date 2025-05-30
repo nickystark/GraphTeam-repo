@@ -26,8 +26,8 @@ import math
 # Set the random seed
 set_seed()
 
-def compute_q_log(t, T, q_min=0.7 , q_max=0.99):
-    return q_min + (q_max - q_min) * (math.log(1 + t) / math.log(1 + T))
+def anneal_q(epoch, max_epoch, q_min=0.1, q_max=0.7):
+    return q_min + (q_max - q_min) * (epoch / max_epoch)
 
 def add_zeros(data):
     data.x = torch.zeros(data.num_nodes, dtype=torch.long)
@@ -35,14 +35,14 @@ def add_zeros(data):
 
 
 
-def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch):
+def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch, max_epoch):
     total_loss = 0
     correct = 0
     total = 0
 
 
-    #new_q = compute_q_log(current_epoch + 1, 100)
-    #criterion.update_q(new_q)
+    new_q = anneal_q(current_epoch + 1, max_epoch, 0.1, 0.7)
+    criterion.update_q(new_q)
 
     # Aggiorna le maschere dei pesi
     if (current_epoch + 1) >= 5 and (current_epoch + 1) % 10 == 0:
@@ -263,7 +263,7 @@ def main(args):
                 train_loader, model, optimizer, criterion, scheduler, device,
                 save_checkpoints=(epoch + 1 in checkpoint_intervals),
                 checkpoint_path=os.path.join(checkpoints_folder, f"model_{test_dir_name}"),
-                current_epoch=epoch
+                current_epoch=epoch, num_epochs
             )
             val_loss,val_acc = evaluate(val_loader, model, device, criterion, calculate_accuracy=True)
             #val_f1 = f1(val_loader, model, device)
