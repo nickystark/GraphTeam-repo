@@ -26,11 +26,40 @@ import math
 # Set the random seed
 set_seed()
 
-def schedule_k(epoch, max_epochs, start_k=0.3, end_k=0.5):
-    return start_k + (end_k - start_k) * (epoch / max_epochs)
+def schedule_k(epoch, max_epochs, k_start=0.3, k_end=0.5):
+    """
+    Linear scheduling of 'k' from k_start to k_end over the training epochs.
+    Useful for gradually relaxing the truncation threshold in losses like GCOD.
 
-def anneal_q(epoch, max_epoch, q_min=0.1, q_max=0.7):
-    return q_min + (q_max - q_min) * (epoch / max_epoch)
+    Args:
+        epoch (int): Current epoch (starting from 1).
+        max_epochs (int): Total number of epochs.
+        k_start (float): Initial value of k.
+        k_end (float): Final value of k.
+
+    Returns:
+        float: Updated k for the current epoch.
+    """
+    progress = epoch / max_epochs
+    return k_start + (k_end - k_start) * progress
+
+
+def anneal_q(epoch, max_epochs, q_start=0.7, q_end=0.1):
+    """
+    Anneals 'q' from a high value (robust like MAE) to a lower value (closer to CE)
+    over the training epochs, to transition from robustness to faster convergence.
+
+    Args:
+        epoch (int): Current epoch (starting from 1).
+        max_epochs (int): Total number of epochs.
+        q_start (float): Initial value of q (e.g., 0.7).
+        q_end (float): Final value of q (e.g., 0.1).
+
+    Returns:
+        float: Updated q for the current epoch.
+    """
+    progress = epoch / max_epochs
+    return q_start + (q_end - q_start) * progress
 
 def add_zeros(data):
     data.x = torch.zeros(data.num_nodes, dtype=torch.long)
@@ -38,15 +67,15 @@ def add_zeros(data):
 
 
 
-def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch, max_epoch, q_min, k_min, update):
+def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch, max_epoch, q_start, k_start, update):
     total_loss = 0
     correct = 0
     total = 0
     
 
-    new_q = anneal_q(current_epoch + 1, max_epoch, q_min, 0.7)
+    new_q = anneal_q(current_epoch + 1, max_epoch, q_start, 0.1)
     criterion.update_q(new_q)
-    new_k = schedule_k(current_epoch + 1, max_epoch, k_min, 0.5)
+    new_k = schedule_k(current_epoch + 1, max_epoch, k_start, 0.5)
     criterion.update_k(new_k)
     # Aggiorna le maschere dei pesi
     if (current_epoch + 1) >= update and (current_epoch + 1) % update == 0:
