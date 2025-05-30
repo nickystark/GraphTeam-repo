@@ -236,8 +236,9 @@ def main(args):
         train_size = len(full_dataset) - val_size
         generator = torch.Generator().manual_seed(12)
         train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size], generator=generator)
-     
+        print('mela')
         criterion = DynamicGCLoss(len(train_dataset), device = device)
+        print('mela')
 
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False)
