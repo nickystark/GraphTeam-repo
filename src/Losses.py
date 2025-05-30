@@ -42,7 +42,7 @@ class DynamicGCLoss(nn.Module):
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
 
         const_term = ((1 - self.k**self.q) / self.q)
-        loss = ((1 - Yg**self.q) / self.q - const_term) * self.weight[indexes]
+        loss = ((1 - Yg**self.q) / self.q - const_term) * self.weight[indexes.to(self.weight.device)]
         return torch.mean(loss)
 
     def update_weight(self, logits, targets, indexes):
