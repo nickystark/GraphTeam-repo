@@ -54,7 +54,8 @@ class DynamicGCLoss(nn.Module):
         Lq = (1 - Yg**self.q) / self.q
         print("Yg mean:", Yg.mean().item(), "max:", Yg.max().item())
         # Crea un tensore delle dimensioni di Lq e lo riempe di un lavore costante Lq(k) la cosidetta soglia
-        Lqk = torch.full_like(Lq, fill_value=(1 - self.k**self.q) / self.q) 
+        Lqk_value = (1 - self.k**self.q) / self.q
+        Lqk = torch.full_like(Lq, fill_value=Lqk_value) 
 
         # Aggiorna i pesi solo dove Lq < Lqk, azzeriamo la loss quando Lq>Lq(k) esempi più incerti 
         condition = Lq < Lqk
