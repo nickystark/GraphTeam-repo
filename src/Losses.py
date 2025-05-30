@@ -39,16 +39,6 @@ class DynamicGCLoss(nn.Module):
 
     def forward(self, logits, targets, indexes):
 
-        # Debug prints
-        print("Indexes device:", indexes.device)
-        print("Weight device:", self.weight.device)
-        print("Indexes dtype:", indexes.dtype)
-        print("Weight shape:", self.weight.shape)
-        print("Indexes min/max:", indexes.min().item(), indexes.max().item())
-
-        assert indexes.min() >= 0 and indexes.max() < self.weight.size(0), "Index out of range!"
-        assert indexes.dtype == torch.long, "Indexes must be LongTensor!"
-        assert indexes.device == self.weight.device, "Indexes and weights must be on same device!"
         
         p = F.softmax(logits, dim=1)
         Yg = torch.gather(p, 1, targets.unsqueeze(1))
