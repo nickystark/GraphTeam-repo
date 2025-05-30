@@ -318,7 +318,7 @@ def main(args):
             train_accuracies.append(train_acc)
             val_losses.append(val_loss)
             val_accuracies.append(val_acc)
-            patience=arg.patience
+            patience=args.patience
             
 
             if val_acc> best_val_accuracy:
