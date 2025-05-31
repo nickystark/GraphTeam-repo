@@ -31,7 +31,7 @@ class SCELoss(torch.nn.Module):
 
         rce_loss = (-probs * torch.log(targets_soft)).sum(dim=1).mean()
 
-    return self.alpha * ce_loss + self.beta * rce_loss
+        return self.alpha * ce_loss + self.beta * rce_loss
 
     def update_alfa(self, alfa):
         self.alpha = alfa
