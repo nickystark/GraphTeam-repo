@@ -72,8 +72,7 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
     correct = 0
     total = 0
     
-
-   ''' #new_q = anneal_q(current_epoch + 1, max_epoch, q_start, 1)
+''' #new_q = anneal_q(current_epoch + 1, max_epoch, q_start, 1)
     #criterion.update_q(new_q)
     #new_k = schedule_k(current_epoch + 1, max_epoch, k_start, 0.5)
     #criterion.update_k(new_k)
@@ -86,7 +85,8 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
             for data in data_loader:  
                 data = data.to(device)
                 outputs = model(data)
-                criterion.update_weight(outputs, data.y, data.idx) '''
+                criterion.update_weight(outputs, data.y, data.idx) 
+'''
     
     model.train()
     # ALLlllliiENAMENTO
