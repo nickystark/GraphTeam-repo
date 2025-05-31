@@ -17,8 +17,8 @@ class SCELoss(torch.nn.Module):
         else:
             self.ce = torch.nn.CrossEntropyLoss()
     def smooth_one_hot(self, targets):
-        confidence = 1.0 - self.smoothing
-        smoothing_value = self.smoothing / (self.num_classes - 1)
+        confidence = 1.0 - 0.1
+        smoothing_value = 0.1 / (self.num_classes - 1)
         one_hot = torch.full((targets.size(0), self.num_classes), smoothing_value).to(targets.device)
         one_hot.scatter_(1, targets.unsqueeze(1), confidence)
         return one_hot
