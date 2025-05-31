@@ -213,7 +213,7 @@ def main(args):
         #weight = tensor([1.3773, 0.9781, 0.5685, 0.9495, 0.9572, 2.5337])
 
       
-        criterion = SCELossWithMAE( alpha=0.1, beta=1.0, gamma=0.5, num_classes=6, smoothing=0.1)
+        criterion = SCELoss( alpha=0.1, beta=1.0, smoothing=0.1)
    
 
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
@@ -237,14 +237,14 @@ def main(args):
         for epoch in range(num_epochs):
 
             total_epochs = num_epochs
-            initial_alpha = 0.5
+            initial_alpha = 0.3
             initial_beta = 0.7
             initial_gamma = 0.1
 
             # Esempio: schedule lineare decrescente
             new_alpha = max(0.01, initial_alpha * (1 - epoch / total_epochs))
             new_beta = max(1, initial_beta * (1 - epoch / total_epochs))
-            new_gamma = max(1, initial_gamma * (1 - epoch / total_epochs))
+            #new_gamma = max(1, initial_gamma * (1 - epoch / total_epochs))
 
             criterion.update_alfa(new_alpha)
             criterion.update_beta(new_beta)
