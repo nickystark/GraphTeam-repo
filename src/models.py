@@ -26,7 +26,7 @@ class GNN(torch.nn.Module):
         self.emb_dim = emb_dim
         self.num_class = num_class
         self.graph_pooling = graph_pooling
-        self.encoder = nn.Sequential(self.conv1, self.conv2)
+
         # Definisci anche altre parti del modello se necessario (ad esempio, head per la classificazione)
 
         if self.num_layer < 2:
@@ -35,9 +35,10 @@ class GNN(torch.nn.Module):
         ### GNN to generate node embeddings
         if virtual_node:
             self.gnn_node = GNN_node_Virtualnode(num_layer, emb_dim, JK = JK, drop_ratio = drop_ratio, residual = residual, gnn_type = gnn_type)
+            self.encoder = nn.Sequential(self.gnn_node, self.gnn_node)
         else:
             self.gnn_node = GNN_node(num_layer, emb_dim, JK = JK, drop_ratio = drop_ratio, residual = residual, gnn_type = gnn_type)
-
+            self.encoder = nn.Sequential(self.gnn_node, self.gnn_node)
 
         ### Pooling function to generate whole-graph embeddings
         if self.graph_pooling == "sum":
