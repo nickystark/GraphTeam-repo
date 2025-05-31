@@ -38,7 +38,7 @@ class GNN(torch.nn.Module):
             self.encoder = nn.Sequential(self.gnn_node, self.gnn_node)
         else:
             self.gnn_node = GNN_node(num_layer, emb_dim, JK = JK, drop_ratio = drop_ratio, residual = residual, gnn_type = gnn_type)
-            self.encoder = nn.Sequential(self.gnn_node, nn.ReLU(), self.gnn_node)
+            self.encoder = nn.Sequential(GNN_node(emb_dim), nn.ReLU(), GNN_node(emb_dim))
 
         ### Pooling function to generate whole-graph embeddings
         if self.graph_pooling == "sum":
