@@ -235,6 +235,20 @@ def main(args):
             checkpoint_intervals = [num_epochs]
 
         for epoch in range(num_epochs):
+
+            total_epochs = num_epochs
+            initial_alpha = 0.5
+            initial_beta = 0.7
+            initial_gamma = 0.1
+
+            # Esempio: schedule lineare decrescente
+            new_alpha = max(0.01, initial_alpha * (1 - epoch / total_epochs))
+            new_beta = max(1, initial_beta * (1 - epoch / total_epochs))
+            new_gamma = max(1, initial_gamma * (1 - epoch / total_epochs))
+
+            criterion.update_alfa(new_alpha)
+            criterion.update_beta(new_beta)
+            criterion.update_gamma(new_gamma)
             train_loss, train_acc = train(
                 train_loader, model, optimizer, criterion, scheduler, device,
                 save_checkpoints=(epoch + 1 in checkpoint_intervals),
