@@ -73,4 +73,6 @@ if __name__ == '__main__':
     pretrain_encoder = pretrain_dgi(data_loader, in_channels=7, hidden_channels=300, epochs=20, device=device)
     
     # Salva l’encoder pretrainato in un checkpoint per il fine-tuning
-    torch.save(pretrain_encoder.state_dict(), "checkpoints/encoder_pretrained.pth")
+    pretrained_state = torch.load(args.pretrained_encoder_path, map_location=device, weights_only=False)
+    torch.save(pretrained_state, "checkpoints/encoder_pretrained.pth")
+    
