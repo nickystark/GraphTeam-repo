@@ -67,7 +67,7 @@ def add_zeros(data):
 
 
 
-def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch, max_epoch, q_start, k_start, update, start_update):
+def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch, max_epoch, q_start, k_start, update, start_update, use_pretrain):
     total_loss = 0
     correct = 0
     total = 0
@@ -217,7 +217,14 @@ def main(args):
     else:
         res=False
     
-    
+    if args.use_pretraining:
+        print("Caricamento encoder pretrainato...")
+        # Carica il modello encoder salvato durante il pretraining.
+        # Supponendo che il tuo modello abbia un attributo 'encoder'
+        pretrained_state = torch.load(args.pretrained_encoder_path, map_location=device)
+        model.encoder.load_state_dict(pretrained_state)
+  
+
 
     if args.gnn == 'gin':
         model = GNN(gnn_type = 'gin', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = False, JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
@@ -368,10 +375,10 @@ if __name__ == "__main__":
     parser.add_argument('--update', type=int, default=10, help='epoca in cui aggiornare la maschera per la DYGCE (default: 10)')
     parser.add_argument('--start_update', type=int, default=20, help='start epoca (default: 10)')
     parser.add_argument('--patience', type=int, default=20, help='start epoca (default: 20)')
-
+    parser.add_argument('--patience', type=int, default=20, help='start epoca (default: 20)')
     
 
-    args = parser.parse_args()
+    args = parser.parse_args('--use_pretrain', type=int, default 0, help='Set 0 to not use pretraining, 1 to enable pretraining(default: 0)')
     
   
     main(args)
