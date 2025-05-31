@@ -215,19 +215,25 @@ def main(args):
     else:
         res=False
     
-    if args.use_pretrain:
-        print("Caricamento encoder pretrainato...")
-        # Carica il modello encoder salvato durante il pretraining.
-        # Supponendo che il tuo modello abbia un attributo 'encoder'
-        pretrained_state = torch.load(args.pretrained_encoder_path, map_location=device)
-        model.encoder.load_state_dict(pretrained_state)
   
 
 
     if args.gnn == 'gin':
         model = GNN(gnn_type = 'gin', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = False, JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
+        if args.use_pretrain:
+          print("Caricamento encoder pretrainato...")
+          # Carica il modello encoder salvato durante il pretraining.
+          # Supponendo che il tuo modello abbia un attributo 'encoder'
+          pretrained_state = torch.load(args.pretrained_encoder_path, map_location=device)
+          model.encoder.load_state_dict(pretrained_state)
     elif args.gnn == 'gin-virtual':
         model = GNN(gnn_type = 'gin', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = True , JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
+        if args.use_pretrain:
+          print("Caricamento encoder pretrainato...")
+          # Carica il modello encoder salvato durante il pretraining.
+          # Supponendo che il tuo modello abbia un attributo 'encoder'
+          pretrained_state = torch.load(args.pretrained_encoder_path, map_location=device)
+          model.encoder.load_state_dict(pretrained_state)
     elif args.gnn == 'gcn':
         model = GNN(gnn_type = 'gcn', num_class = 6, num_layer = args.num_layer, emb_dim = args.emb_dim, drop_ratio = args.drop_ratio, virtual_node = False, JK = args.JK, residual= res, graph_pooling=args.readout).to(device)
     elif args.gnn == 'gcn-virtual':
