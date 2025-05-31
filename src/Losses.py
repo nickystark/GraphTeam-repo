@@ -16,17 +16,28 @@ class SCELoss(torch.nn.Module):
             self.ce = torch.nn.CrossEntropyLoss(weight=class_weights)
         else:
             self.ce = torch.nn.CrossEntropyLoss()
+    def smooth_one_hot(self, targets):
+        confidence = 1.0 - self.smoothing
+        smoothing_value = self.smoothing / (self.num_classes - 1)
+        one_hot = torch.full((targets.size(0), self.num_classes), smoothing_value).to(targets.device)
+        one_hot.scatter_(1, targets.unsqueeze(1), confidence)
+        return one_hot
 
     def forward(self, logits, targets):
         ce_loss = self.ce(logits, targets)
 
         probs = torch.softmax(logits, dim=1)
-        targets_onehot = torch.nn.functional.one_hot(targets, num_classes=self.num_classes).float()
-        targets_onehot = torch.clamp(targets_onehot, min=1e-4, max=1.0)  # evita log(0)
+        targets_soft = self.smooth_one_hot(targets)  # usa soft label
 
-        rce_loss = (-probs * torch.log(targets_onehot)).sum(dim=1).mean()
+        rce_loss = (-probs * torch.log(targets_soft)).sum(dim=1).mean()
 
-        return self.alpha * ce_loss + self.beta * rce_loss
+    return self.alpha * ce_loss + self.beta * rce_loss
+
+    def update_alfa(self, alfa):
+        self.alpha = alfa
+
+    def update_beta(self, beta):
+        self.beta = beta
 
 class DynamicGCLoss(nn.Module):
     def __init__(self, trainset_size, device, q=0.1, k=0.3):
