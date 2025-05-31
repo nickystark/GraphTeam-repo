@@ -238,18 +238,24 @@ def main(args):
 
             total_epochs = num_epochs
             initial_alpha = 0.3
+            final_alpha = 0.01
+
             initial_beta = 0.7
-            initial_gamma = 0.1
+            final_beta = 2.0
 
-            # Esempio: schedule lineare decrescente
-            new_alpha = max(0.01, initial_alpha * (1 - epoch / total_epochs))
-            new_beta = max(1, initial_beta * (1 - epoch / total_epochs))
-            print(new_alpha)
-            print(new_beta)
+            if epoch >= 20:
+                progress = (epoch - 20) / (total_epochs - 20)
+                progress = min(max(progress, 0.0), 1.0)  # clamp tra 0 e 1
 
+                new_alpha = initial_alpha * (1 - progress) + final_alpha * progress
+                new_beta = initial_beta * (1 - progress) + final_beta * progress
+            else:
+                new_alpha = initial_alpha
+                new_beta = initial_beta
+
+            print(f"Epoch {epoch}: alpha={new_alpha:.4f}, beta={new_beta:.4f}")
             criterion.update_alfa(new_alpha)
             criterion.update_beta(new_beta)
-            
             train_loss, train_acc = train(
                 train_loader, model, optimizer, criterion, scheduler, device,
                 save_checkpoints=(epoch + 1 in checkpoint_intervals),
