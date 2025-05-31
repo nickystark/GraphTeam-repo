@@ -8,8 +8,8 @@ from src.models import GNN  # Usa l’encoder che già utilizzi o una sua versio
 class Encoder(nn.Module):
     def __init__(self, in_channels, hidden_channels):
         super(Encoder, self).__init__()
-        self.conv1 = GCNConv(in_channels, hidden_channels)
-        self.conv2 = GCNConv(hidden_channels, hidden_channels)
+        self.conv1 =  GNN_node(3, 200, 'sum', 0.5, 1, 'gin')
+        self.conv2 =  GNN_node(3, 200, 'sum', 0.5, 1, 'gin')
 
     def forward(self, x, edge_index):
         x = F.relu(self.conv1(x, edge_index))
