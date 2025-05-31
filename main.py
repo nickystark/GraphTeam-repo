@@ -378,7 +378,7 @@ if __name__ == "__main__":
     parser.add_argument('--patience', type=int, default=20, help='start epoca (default: 20)')
     
 
-    args = parser.parse_args('--use_pretrain', type=int, default 0, help='Set 0 to not use pretraining, 1 to enable pretraining(default: 0)')
+    args = parser.parse_args('--use_pretrain', type=int, default=0, help='Set 0 to not use pretraining, 1 to enable pretraining(default: 0)')
     
   
     main(args)
