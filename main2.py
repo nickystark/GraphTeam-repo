@@ -267,7 +267,7 @@ def main(args):
             train_accuracies.append(train_acc)
             val_losses.append(val_loss)
             val_accuracies.append(val_acc)
-            patience=10
+            patience=30
 
             if val_f1 > best_val_accuracy:
                 best_val_accuracy = val_f1
