@@ -65,12 +65,31 @@ class GraphDataset(Dataset):
             graphs_dicts = json.load(f)  # Load full JSON array without keeping references
             return len(graphs_dicts),graphs_dicts  # Return number of graphs
 
-def dictToGraphObject(graph_dict):
+'''def dictToGraphObject(graph_dict):
     edge_index = torch.tensor(graph_dict["edge_index"], dtype=torch.long)
     edge_attr = torch.tensor(graph_dict["edge_attr"], dtype=torch.float) if graph_dict["edge_attr"] else None
     num_nodes = graph_dict["num_nodes"]
     y = torch.tensor(graph_dict["y"][0], dtype=torch.long) if graph_dict["y"] is not None else None
-    return Data(edge_index=edge_index, edge_attr=edge_attr, num_nodes=num_nodes, y=y)
+    return Data(edge_index=edge_index, edge_attr=edge_attr, num_nodes=num_nodes, y=y)'''
+def dictToGraphObject(graph_dict):
+    # Converte edge_index e edge_attr
+    edge_index = torch.tensor(graph_dict["edge_index"], dtype=torch.long)
+    edge_attr = torch.tensor(graph_dict["edge_attr"], dtype=torch.float) if graph_dict["edge_attr"] else None
+    num_nodes = graph_dict["num_nodes"]
+    
+    # Se nel dizionario non è presente una feature 'x', creiamo un tensore di uno (default)
+    if "x" in graph_dict:
+        x = torch.tensor(graph_dict["x"], dtype=torch.float)
+    else:
+        # Ad esempio, un vettore di 1 per ogni nodo; 
+        # se preferisci altre dimensioni, modifica di conseguenza.
+        x = torch.ones((num_nodes, 1), dtype=torch.float)
+    
+    # Converte la label
+    y = torch.tensor(graph_dict["y"][0], dtype=torch.long) if graph_dict["y"] is not None else None
+    
+    # Costruisce e ritorna l'oggetto Data
+    return Data(x=x, edge_index=edge_index, edge_attr=edge_attr, num_nodes=num_nodes, y=y)
 
 
 
