@@ -71,7 +71,8 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
     total_loss = 0
     correct = 0
     total = 0 
-         # ALLlllliiENAMENTO
+    model.train()  
+    # ALLlllliiENAMENTO
     for data in data_loader:
         data = data.to(device)
         optimizer.zero_grad()
@@ -93,7 +94,6 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
         print(f"Checkpoint saved at {checkpoint_file}")
 
     return total_loss / len(data_loader), correct / total
-model.train()  
 
 ''' #new_q = anneal_q(current_epoch + 1, max_epoch, q_start, 1)
     #criterion.update_q(new_q)
