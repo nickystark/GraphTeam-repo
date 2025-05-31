@@ -213,7 +213,7 @@ def main(args):
         #weight = tensor([1.3773, 0.9781, 0.5685, 0.9495, 0.9572, 2.5337])
 
       
-        criterion = SCELoss( alpha=0.1, beta=1.0, smoothing=0.1)
+        criterion = SCELoss( alpha=0.1, beta=1.0)
    
 
         train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
