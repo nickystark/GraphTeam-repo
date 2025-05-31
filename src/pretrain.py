@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 from torch_geometric.data import DataLoader
 from src.models import GNN  # Usa l’encoder che già utilizzi o una sua versione semplificata
+from src.conv import GNN_node, GNN_node_Virtualnode
 
 class Encoder(nn.Module):
     def __init__(self, in_channels, hidden_channels):
