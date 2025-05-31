@@ -70,25 +70,8 @@ def add_zeros(data):
 def train(data_loader, model, optimizer, criterion, scheduler, device, save_checkpoints, checkpoint_path, current_epoch, max_epoch, q_start, k_start, update, start_update, use_pretrain):
     total_loss = 0
     correct = 0
-    total = 0
-    
-''' #new_q = anneal_q(current_epoch + 1, max_epoch, q_start, 1)
-    #criterion.update_q(new_q)
-    #new_k = schedule_k(current_epoch + 1, max_epoch, k_start, 0.5)
-    #criterion.update_k(new_k)
-
-    
-    # Aggiorna le maschere dei pesi
-    if (current_epoch + 1) >= start_update and (current_epoch + 1) % update == 0:
-        model.eval()
-        with torch.no_grad():
-            for data in data_loader:  
-                data = data.to(device)
-                outputs = model(data)
-                criterion.update_weight(outputs, data.y, data.idx) 
-'''
-    
-        # ALLlllliiENAMENTO
+    total = 0 
+         # ALLlllliiENAMENTO
     for data in data_loader:
         data = data.to(device)
         optimizer.zero_grad()
@@ -110,7 +93,25 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
         print(f"Checkpoint saved at {checkpoint_file}")
 
     return total_loss / len(data_loader), correct / total
-model.train()
+model.train()  
+
+''' #new_q = anneal_q(current_epoch + 1, max_epoch, q_start, 1)
+    #criterion.update_q(new_q)
+    #new_k = schedule_k(current_epoch + 1, max_epoch, k_start, 0.5)
+    #criterion.update_k(new_k)
+
+    
+    # Aggiorna le maschere dei pesi
+    if (current_epoch + 1) >= start_update and (current_epoch + 1) % update == 0:
+        model.eval()
+        with torch.no_grad():
+            for data in data_loader:  
+                data = data.to(device)
+                outputs = model(data)
+                criterion.update_weight(outputs, data.y, data.idx) 
+'''
+    
+
 
 def f1(val_loader, model, device):
     model.eval()
