@@ -25,6 +25,8 @@ class GNN(torch.nn.Module):
         self.emb_dim = emb_dim
         self.num_class = num_class
         self.graph_pooling = graph_pooling
+        self.encoder = nn.Sequential(self.conv1, self.conv2)
+        # Definisci anche altre parti del modello se necessario (ad esempio, head per la classificazione)
 
         if self.num_layer < 2:
             raise ValueError("Number of GNN layers must be greater than 1.")
@@ -60,8 +62,23 @@ class GNN(torch.nn.Module):
             self.graph_pred_linear = torch.nn.Linear(self.emb_dim, self.num_class)
 
     def forward(self, batched_data):
-        h_node = self.gnn_node(batched_data)
-
-        h_graph = self.pool(h_node, batched_data.batch)
-
-        return self.graph_pred_linear(h_graph)
+        # Estrae le feature dei nodi e l'edge_index dal batch
+        x, edge_index = batched_data.x, batched_data.edge_index
+        
+        # Applica l'encoder: supponendo che self.encoder sia ad esempio una lista di due layer,
+        # eseguiamo ciascun layer in sequenza
+        h = self.encoder[0](x, edge_index)
+        h = self.encoder[1](h, edge_index)
+        
+        # Aggrega a livello di grafo le feature ottenute usando il global add pool;
+        # batched_data.batch contiene gli indici per aggregare i nodi nel grafo di appartenenza
+        h_graph_encoded = global_add_pool(h, batched_data.batch)
+        
+        # Alternativamente, se hai un ulteriore ramo di elaborazione:
+        h_node = self.gnn_node(batched_data)  # Ad esempio, una parte del modello che elabora i nodi
+        h_graph = self.pool(h_node, batched_data.batch)  # Pooling a livello di grafo
+        
+        # Infine, passa la rappresentazione aggregata attraverso il layer finale per la predizione
+        output = self.graph_pred_linear(h_graph)
+        
+        return output
