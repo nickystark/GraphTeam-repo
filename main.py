@@ -299,7 +299,7 @@ def main(args):
 
         
         #criterion = DynamicGCLoss(len(full_dataset), q=q_start, k=k_start, device = device)
-        criterion = SCEloss()
+        criterion = SCELoss()
       
 
         # Calculate intervals for saving checkpoints
