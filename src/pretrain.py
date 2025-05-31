@@ -42,7 +42,7 @@ class DGI(nn.Module):
         loss_neg = F.binary_cross_entropy_with_logits(neg_logits, neg_labels)
         return loss_pos + loss_neg
 
-def pretrain_dgi(data_loader, in_channels, hidden_channels, epochs=20, device='cpu'):
+def pretrain_dgi(data_loader, in_channels, hidden_channels, epochs=20, device='gpu'):
     encoder = Encoder(in_channels, hidden_channels).to(device)
     model = DGI(encoder, hidden_channels).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
