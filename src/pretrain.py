@@ -35,12 +35,45 @@ class DGI(nn.Module):
         neg_logits = self.disc(neg_z * summary)
         return pos_logits, neg_logits
 
+# Inside the DGI model class, modify the loss_fn method:
+        # Inside the DGI model class, modify the loss_fn method:
+
     def loss_fn(self, pos_logits, neg_logits):
+        # Ensure pos_logits and neg_logits are 1D tensors
+        # This assumes the relevant score is in the first column (index 0) of the last dimension
+        # If your model outputs a single score per sample, the squeeze() operation might be sufficient.
+        # You might need to adjust the slicing [:, 0] or use squeeze() depending on your model's output.
+        if pos_logits.ndim > 1:
+            # Assuming the last dimension is the one to remove and the relevant score is at index 0
+            # Adjust this if your model outputs a different structure
+            if pos_logits.shape[-1] == 1:
+                 pos_logits = pos_logits.squeeze(-1) # Remove the last dimension if it's 1
+            else:
+                 # If the last dimension is > 1, you need to decide which value to use.
+                 # For standard binary classification, it should be a single score per sample.
+                 # Let's assume the first value in the last dimension is the intended score.
+                 pos_logits = pos_logits[:, 0]
+    
+        if neg_logits.ndim > 1:
+             if neg_logits.shape[-1] == 1:
+                 neg_logits = neg_logits.squeeze(-1)
+             else:
+                 neg_logits = neg_logits[:, 0]
+    
+    
         pos_labels = torch.ones(pos_logits.size(0)).to(pos_logits.device)
         neg_labels = torch.zeros(neg_logits.size(0)).to(neg_logits.device)
+    
         loss_pos = F.binary_cross_entropy_with_logits(pos_logits, pos_labels)
         loss_neg = F.binary_cross_entropy_with_logits(neg_logits, neg_labels)
         return loss_pos + loss_neg
+
+
+
+
+
+
+
 
 def pretrain_dgi(data_loader, in_channels, hidden_channels, epochs=20, device='gpu'):
     encoder = Encoder(in_channels, hidden_channels).to(device)
