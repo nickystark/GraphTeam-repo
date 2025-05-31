@@ -244,11 +244,12 @@ def main(args):
             # Esempio: schedule lineare decrescente
             new_alpha = max(0.01, initial_alpha * (1 - epoch / total_epochs))
             new_beta = max(1, initial_beta * (1 - epoch / total_epochs))
-            #new_gamma = max(1, initial_gamma * (1 - epoch / total_epochs))
+            print(new_alpha)
+            print(new_beta)
 
             criterion.update_alfa(new_alpha)
             criterion.update_beta(new_beta)
-            criterion.update_gamma(new_gamma)
+            
             train_loss, train_acc = train(
                 train_loader, model, optimizer, criterion, scheduler, device,
                 save_checkpoints=(epoch + 1 in checkpoint_intervals),
