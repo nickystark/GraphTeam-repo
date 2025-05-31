@@ -88,8 +88,7 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
                 criterion.update_weight(outputs, data.y, data.idx) 
 '''
     
-    model.train()
-    # ALLlllliiENAMENTO
+        # ALLlllliiENAMENTO
     for data in data_loader:
         data = data.to(device)
         optimizer.zero_grad()
@@ -111,9 +110,7 @@ def train(data_loader, model, optimizer, criterion, scheduler, device, save_chec
         print(f"Checkpoint saved at {checkpoint_file}")
 
     return total_loss / len(data_loader), correct / total
-
-
-
+model.train()
 
 def f1(val_loader, model, device):
     model.eval()
