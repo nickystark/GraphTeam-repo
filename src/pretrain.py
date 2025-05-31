@@ -68,9 +68,9 @@ if __name__ == '__main__':
     dataset = get_data(train=True)  # Separa i dati per pretraining, non servono le etichette
     data_loader = DataLoader(dataset, batch_size=128, shuffle=True)
     
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "gpu")
     # Parametri da adattare ai tuoi dati: in_channels ad esempio  ? , hidden_channels ad es. 300
     pretrain_encoder = pretrain_dgi(data_loader, in_channels=7, hidden_channels=300, epochs=20, device=device)
     
     # Salva l’encoder pretrainato in un checkpoint per il fine-tuning
-    torch.save(pretrain_encoder.state_dict(), "checkpoints/encoder_pretrained")
+    torch.save(pretrain_encoder.state_dict(), "checkpoints/encoder_pretrained.pth")
