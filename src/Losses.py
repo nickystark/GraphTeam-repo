@@ -148,5 +148,5 @@ class SCELossWithMAE(torch.nn.Module):
     def update_beta(self, beta):
         self.beta = beta
 
-    def update_beta(self, gamma):
+    def update_gamma(self, gamma):
         self.gamma = gamma
