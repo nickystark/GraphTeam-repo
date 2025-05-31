@@ -215,7 +215,7 @@ def main(args):
     else:
         res=False
     
-    if args.use_pretraining:
+    if args.use_pretrain:
         print("Caricamento encoder pretrainato...")
         # Carica il modello encoder salvato durante il pretraining.
         # Supponendo che il tuo modello abbia un attributo 'encoder'
